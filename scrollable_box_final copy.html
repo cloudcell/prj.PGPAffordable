@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toggleable Multi-Select List</title>
+<script>
+function toggleSelectBox() {
+  var selectBox = document.getElementById('selectBoxContainer');
+  if (selectBox.style.display === 'none') {
+    selectBox.style.display = 'flex';
+  } else {
+    selectBox.style.display = 'none';
+  }
+}
+</script>
+<style>
+  select[multiple] option:checked {
+    background-color: #007bff; /* Blue background for selected options */
+    color: white; /* White text for better readability */
+  }
+
+  select[multiple] {
+    width: 300px;
+    height: 200px;
+    overflow-y: scroll;
+  }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var multiSelect = document.querySelector('select[multiple]');
+
+  // Prevent the default focus behavior to stop scrolling the select element
+  multiSelect.addEventListener('focus', function(e) {
+    e.preventDefault();
+  }, true); // Use capture to ensure the event is intercepted before default behavior
+
+  // Function to update option selection
+  function updateOptions(selected) {
+    Array.from(multiSelect.options).forEach(option => {
+      option.selected = selected;
+    });
+
+    // Trigger change event
+    multiSelect.dispatchEvent(new Event('change', { 'bubbles': true }));
+  }
+
+  // Select all items
+  document.getElementById('select-all').addEventListener('click', function() {
+    updateOptions(true);
+  });
+
+  // Deselect all items
+  document.getElementById('deselect-all').addEventListener('click', function() {
+    updateOptions(false);
+  });
+
+  multiSelect.addEventListener('mousedown', function(e) {
+    e.preventDefault();
+    var option = e.target;
+    if (option.tagName === 'OPTION') {
+      // Toggle selection of the option
+      option.selected = !option.selected;
+      // Trigger a change event manually
+      multiSelect.dispatchEvent(new Event('change', { 'bubbles': true }));
+      // Prevent the click event from being propagated
+      e.stopPropagation();
+    }
+  }, false);
+
+  multiSelect.addEventListener('change', function(e) {
+    console.log(Array.from(this.selectedOptions).map(o => o.value));
+  });
+});
+</script>
+</head>
+<body>
+
+<!-- Category Filter Link -->
+<a href="#" onclick="toggleSelectBox(); return false;">Category Filter</a>
+
+<!-- The select box container -->
+
+
+
+<div id="selectBoxContainer" style="display: none; align-items: center; flex-direction: column;">
+  <div>
+    <button id="select-all">Select All</button>
+    <button id="deselect-all">Deselect All</button>
+  </div>
+  <select name="inp_key_term_classes" multiple>
+    <option value="body structure">body structure</option>
+    <option value="clinical finding">clinical finding</option>
+    <option value="environment">environment</option>
+    <option value="geographical location">geographical location</option>
+    <option value="event">event</option>
+    <option value="observable entity">observable entity</option>
+    <option value="organism">organism</option>
+    <option value="pharmaceutical product">pharmaceutical product</option>
+    <option value="biological product">biological product</option>
+    <option value="physical force">physical force</option>
+    <option value="physical object">physical object</option>
+    <option value="procedure">procedure</option>
+    <option value="qualifier value">qualifier value</option>
+    <option value="record artifact">record artifact</option>
+    <option value="situation">situation</option>
+    <option value="metadata">metadata</option>
+    <option value="social concept">social concept</option>
+    <option value="special concept">special concept</option>
+    <option value="specimen">specimen</option>
+    <option value="staging scale">staging scale</option>
+    <option value="substance">substance</option>
+    <option value="miscellaneous">miscellaneous</option>
+  </select>
+</div>
+
+</body>
+</html>

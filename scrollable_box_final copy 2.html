@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sliding Multi-Select List</title>
+<style>
+  body {
+    margin: 0;
+    padding-top: 50px;
+    font-family: Arial, sans-serif;
+  }
+
+  #toggleLink {
+    display: inline-block;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+
+  #selectBoxContainer {
+    background: #f7f7f7;
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 300px;
+    box-sizing: border-box;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.5s ease;
+  }
+
+  select[multiple] {
+    width: 100%;
+    height: 200px;
+    margin-top: 10px;
+  }
+
+  /* Styles for the buttons */
+  #select-all, #deselect-all {
+    display: inline-block;
+    margin-right: 5px;
+  }
+</style>
+</head>
+<body>
+
+<a id="toggleLink">Category Filter</a>
+
+<div id="selectBoxContainer">
+  <button id="select-all" type="button">Select All</button>
+  <button id="deselect-all" type="button">Deselect All</button>
+  <select name="inp_key_term_classes" multiple>
+    <option value="body structure">body structure</option>
+    <option value="clinical finding">clinical finding</option>
+    <!-- Add more options here -->
+  </select>
+</div>
+
+<script>
+// This script sets up the toggle functionality for the dropdown
+document.getElementById('toggleLink').addEventListener('click', function() {
+  var container = document.getElementById('selectBoxContainer');
+  container.style.maxHeight = container.style.maxHeight ? null : container.scrollHeight + "px";
+});
+
+// This script sets up the select/deselect all functionality
+document.addEventListener('DOMContentLoaded', function() {
+  var multiSelect = document.querySelector('select[multiple]');
+  
+  document.getElementById('select-all').addEventListener('click', function() {
+    Array.from(multiSelect.options).forEach(function(option) {
+      option.selected = true;
+    });
+    multiSelect.dispatchEvent(new Event('change', { 'bubbles': true }));
+  });
+
+  document.getElementById('deselect-all').addEventListener('click', function() {
+    Array.from(multiSelect.options).forEach(function(option) {
+      option.selected = false;
+    });
+    multiSelect.dispatchEvent(new Event('change', { 'bubbles': true }));
+  });
+
+  multiSelect.addEventListener('mousedown', function(e) {
+    e.preventDefault();
+    var option = e.target;
+    if (option.tagName === 'OPTION') {
+      option.selected = !option.selected;
+      multiSelect.dispatchEvent(new Event('change', { 'bubbles': true }));
+    }
+  });
+
+  multiSelect.addEventListener('change', function() {
+    console.log(Array.from(multiSelect.selectedOptions).map(opt => opt.value));
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,271 @@
+openapi: 3.0.1
+info:
+  title: SOMA API
+  contact:
+    email: info@cloudcell.nz
+  version: 0.0.1
+servers:
+  - url: 'https://soma.science'
+paths:
+  /api/v1/edges_complete_set_status/{session_temp_sub_folder}:
+    get:
+      tags:
+        - Search
+      summary: Get status of edges_complete_set.tsv
+      description: The first request also queues the file for processing.<br/>
+      operationId: edges_complete_set_status
+      parameters:
+        - name: session_temp_sub_folder
+          in: path
+          description: you can get this value from `/session`
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Status'
+        "401":
+          description: Invalid credentials
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/rlabels:
+    get:
+      tags:
+        - Search
+      summary: Get Article References (Text Chunks Documenting Relations) for two Nodes.
+      operationId: rlabels
+      parameters:
+        - name: node1
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: node2
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: relation
+          in: query
+          schema:
+            type: string
+            enum:
+              - causal
+              - associative
+        - name: correlation
+          in: query
+          schema:
+            type: string
+            enum:
+              - pos
+              - neg
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ArticleReferenceList'
+        "401":
+          description: Invalid credentials
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/search:
+    post:
+      tags:
+        - Search
+      operationId: search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mySessionSubfolderName:
+                  type: string
+                inp_key_term_start:
+                  type: string
+                inp_key_term_end:
+                  type: string
+                inp_key_term_classes:
+                  type: array
+                  items:
+                    type: string
+                  enum:
+                    - 'body structure'
+                    - 'clinical finding'
+                    - 'environment'
+                    - 'geographical location'
+                    - 'event'
+                    - 'observable entity'
+                    - 'organism'
+                    - 'pharmaceutical product'
+                    - 'biological product'
+                    - 'physical force'
+                    - 'physical object'
+                    - 'procedure'
+                    - 'qualifier value'
+                    - 'record artifact'
+                    - 'situation'
+                    - 'metadata'
+                    - 'social concept'
+                    - 'special concept'
+                    - 'specimen'
+                    - 'staging scale'
+                    - 'substance'
+                    - 'miscellaneous'
+                inp_nbr_of_jumps:
+                  type: integer
+                  minimum: 1
+                inp_nbr_of_jumps_min:
+                  type: integer
+                  minimum: 1
+                inp_requested_paths:
+                  type: integer
+                  minimum: 1
+                inp_relation:
+                  type: string
+                inp_correlation:
+                  type: string
+                inp_key_term_start_whole:
+                  type: boolean
+                  default: true
+                inp_key_term_start_case:
+                  type: boolean
+                  default: false
+                inp_key_term_end_whole:
+                  type: boolean
+                  default: true
+                inp_key_term_end_case:
+                  type: boolean
+                  default: false
+              required:
+                - mySessionSubfolderName
+                - inp_key_term_start
+                - inp_key_term_end
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pathDataFileUrl:
+                    type: string
+                  nodeDataFileUrl:
+                    type: string
+                  edgeDataFileUrl:
+                    type: string
+                  edgeCompleteDataFileUrl:
+                    type: string
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/session:
+    get:
+      tags:
+        - Search
+      summary: Get session folder.
+      description: The session folder is needed for other requests.<br/>
+      operationId: session
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session_temp_sub_folder:
+                    type: string
+                  url_for_progress_bar:
+                    type: string
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/data/{path}/{filename}:
+    get:
+      tags:
+        - Search
+      summary: Fetch a file from the server
+      description: Returns the requested file from the server's temporary directory.
+      operationId: data
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The path to the file's directory.
+        - name: filename
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The filename of the file to retrieve.
+      responses:
+        "200":
+          description: File successfully retrieved
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "401":
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: File not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    ArticleReferenceList:
+      type: array
+      items:
+        type: object
+        properties:
+          correlation:
+            type: string
+          label:
+            type: string
+          type:
+            type: string
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+    Status:
+      type: object
+      properties:
+        progress:
+          type: string
+        status:
+          type: string
