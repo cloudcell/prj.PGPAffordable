@@ -1,3 +1,4 @@
 *.tsv
 *.png
 venv/*
+*.zip
