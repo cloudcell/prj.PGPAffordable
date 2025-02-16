@@ -1,0 +1,137 @@
+query {
+  drug(chemblId: "CHEMBL1637") {
+    name
+    tradeNames
+    mechanismsOfAction {
+      rows {
+        actionType
+        mechanismOfAction
+        references {
+          source
+          urls
+        }
+        targets {
+          id
+          approvedName
+        }
+      }
+    }
+  }
+}
+
+
+// ======================================= EXAMPLE ==========================================================
+{
+  "data": {
+    "drug": {
+      "name": "GEMCITABINE HYDROCHLORIDE",
+      "tradeNames": [
+        "Gemcitabine hydrochloride",
+        "Gemzar",
+        "Infugem"
+      ],
+      "mechanismsOfAction": {
+        "rows": [
+          {
+            "actionType": "INHIBITOR",
+            "mechanismOfAction": "DNA polymerase (alpha/delta/epsilon) inhibitor",
+            "references": [
+              {
+                "source": "PubMed",
+                "urls": [
+                  "http://europepmc.org/abstract/MED/23115527"
+                ]
+              },
+              {
+                "source": "DailyMed",
+                "urls": [
+                  "http://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=a625c92b-c569-4b98-8d2e-2b3f5e12b34f#section-12",
+                  "http://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=a625c92b-c569-4b98-8d2e-2b3f5e12b34f#section-12"
+                ]
+              }
+            ],
+            "targets": [
+              {
+                "id": "ENSG00000101868",
+                "approvedName": "DNA polymerase alpha 1, catalytic subunit"
+              },
+              {
+                "id": "ENSG00000175482",
+                "approvedName": "DNA polymerase delta 4, accessory subunit"
+              },
+              {
+                "id": "ENSG00000077514",
+                "approvedName": "DNA polymerase delta 3, accessory subunit"
+              },
+              {
+                "id": "ENSG00000062822",
+                "approvedName": "DNA polymerase delta 1, catalytic subunit"
+              },
+              {
+                "id": "ENSG00000106628",
+                "approvedName": "DNA polymerase delta 2, accessory subunit"
+              },
+              {
+                "id": "ENSG00000177084",
+                "approvedName": "DNA polymerase epsilon, catalytic subunit"
+              },
+              {
+                "id": "ENSG00000014138",
+                "approvedName": "DNA polymerase alpha 2, accessory subunit"
+              },
+              {
+                "id": "ENSG00000198056",
+                "approvedName": "DNA primase subunit 1"
+              },
+              {
+                "id": "ENSG00000146143",
+                "approvedName": "DNA primase subunit 2"
+              },
+              {
+                "id": "ENSG00000100479",
+                "approvedName": "DNA polymerase epsilon 2, accessory subunit"
+              },
+              {
+                "id": "ENSG00000148229",
+                "approvedName": "DNA polymerase epsilon 3, accessory subunit"
+              }
+            ]
+          },
+          {
+            "actionType": "INHIBITOR",
+            "mechanismOfAction": "Ribonucleoside-diphosphate reductase RR1 inhibitor",
+            "references": [
+              {
+                "source": "PubMed",
+                "urls": [
+                  "http://europepmc.org/abstract/MED/23115527"
+                ]
+              },
+              {
+                "source": "DailyMed",
+                "urls": [
+                  "http://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=a625c92b-c569-4b98-8d2e-2b3f5e12b34f#section-12",
+                  "http://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=a625c92b-c569-4b98-8d2e-2b3f5e12b34f#section-12"
+                ]
+              }
+            ],
+            "targets": [
+              {
+                "id": "ENSG00000167325",
+                "approvedName": "ribonucleotide reductase catalytic subunit M1"
+              },
+              {
+                "id": "ENSG00000048392",
+                "approvedName": "ribonucleotide reductase regulatory TP53 inducible subunit M2B"
+              },
+              {
+                "id": "ENSG00000171848",
+                "approvedName": "ribonucleotide reductase regulatory subunit M2"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
