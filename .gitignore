@@ -7,3 +7,4 @@ venv/*
 *.db
 .vscode/*
 data/*/*
+*.csv
