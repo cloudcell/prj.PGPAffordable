@@ -6,4 +6,4 @@ venv/*
 *.sqlite
 *.db
 .vscode/*
-
+data/*/*
