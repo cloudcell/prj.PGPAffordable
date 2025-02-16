@@ -1,4 +1,4 @@
-# this file extracts the data from json files and stores it in a database
+# This file extracts the data from JSON files and stores it in a database
 # The database is created using DuckDB in bio_data.duck.db
 
 import os
@@ -9,7 +9,7 @@ import pandas as pd
 # Define paths
 DATA_DIR = "data/202409XX/molecule"  # Change this to your actual directory path
 DUCKDB_PATH = "bio_data.duck.db"
-TEMP_CSV_PATH = "temp_data.csv"
+TEMP_TSV_PATH = "temp_data.tsv"  # Changed file extension to .tsv
 
 # Initialize DuckDB connection
 con = duckdb.connect(DUCKDB_PATH)
@@ -40,8 +40,8 @@ for filename in os.listdir(DATA_DIR):
                         "maximumClinicalTrialPhase": record.get("maximumClinicalTrialPhase"),
                         "hasBeenWithdrawn": record.get("hasBeenWithdrawn"),
                         "isApproved": record.get("isApproved"),
-                        "tradeNames": ", ".join(record.get("tradeNames", [])),  # Convert list to string
-                        "synonyms": ", ".join(record.get("synonyms", [])),  # Convert list to string
+                        "tradeNames": "|".join(record.get("tradeNames", [])),  # Convert list to TSV-friendly format
+                        "synonyms": "|".join(record.get("synonyms", [])),  # Convert list to TSV-friendly format
                         "crossReferences": json.dumps(record.get("crossReferences", {})),  # Store as JSON string
                         "linkedDiseases": json.dumps(record.get("linkedDiseases", {})),  # Store as JSON string
                         "linkedTargets": json.dumps(record.get("linkedTargets", {})),  # Store as JSON string
@@ -54,10 +54,10 @@ for filename in os.listdir(DATA_DIR):
 # Convert list to DataFrame
 df = pd.DataFrame(data_list)
 
-# Save DataFrame to a temporary CSV file
-df.to_csv(TEMP_CSV_PATH, index=False)
+# Save DataFrame to a temporary TSV file
+df.to_csv(TEMP_TSV_PATH, index=False, sep="\t", quoting=3, escapechar="\\")
 
-# Create a table in DuckDB and import CSV data
+# Create a table in DuckDB and import TSV data
 con.execute("""
     CREATE TABLE IF NOT EXISTS molecules (
         id TEXT PRIMARY KEY,
@@ -80,8 +80,8 @@ con.execute("""
 """)
 
 con.execute(f"""
-    COPY molecules FROM '{TEMP_CSV_PATH}'
-    (FORMAT CSV, HEADER TRUE, DELIM ',', QUOTE '"', ESCAPE '"', NULL 'NULL')
+    COPY molecules FROM '{TEMP_TSV_PATH}'
+    (FORMAT CSV, HEADER TRUE, DELIM '\t', QUOTE '"', ESCAPE '"', NULL 'NULL')
 """)
 
 # Verify data import
@@ -90,6 +90,6 @@ print(result)
 
 # Cleanup
 con.close()
-os.remove(TEMP_CSV_PATH)
+os.remove(TEMP_TSV_PATH)
 
-print("Data successfully imported into DuckDB.")
+print("Data successfully imported into DuckDB as TSV.")
