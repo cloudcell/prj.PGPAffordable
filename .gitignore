@@ -2,3 +2,6 @@
 *.png
 venv/*
 *.zip
+*.duckdb
+*.sqlite
+*.db

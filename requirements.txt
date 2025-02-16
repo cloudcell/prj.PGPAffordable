@@ -1,0 +1,4 @@
+duckdb
+rdkit
+pandas
+numpy
