@@ -1,6 +1,3 @@
-# This file extracts the data from JSON files and stores it in a database
-# The database is created using DuckDB in bio_data.duck.db
-
 import os
 import json
 import duckdb
@@ -54,8 +51,8 @@ for filename in os.listdir(DATA_DIR):
 # Convert list to DataFrame
 df = pd.DataFrame(data_list)
 
-# Save DataFrame to a temporary TSV file
-df.to_csv(TEMP_TSV_PATH, index=False, sep="\t", quoting=3, escapechar="\\")
+# Save DataFrame to a temporary TSV file with no extra quoting
+df.to_csv(TEMP_TSV_PATH, index=False, sep="\t", quoting=0, escapechar="")
 
 # Create a table in DuckDB and import TSV data
 con.execute("""
@@ -79,9 +76,10 @@ con.execute("""
     )
 """)
 
+# Copy data into DuckDB with strict mode disabled
 con.execute(f"""
     COPY molecules FROM '{TEMP_TSV_PATH}'
-    (FORMAT CSV, HEADER TRUE, DELIM '\t', QUOTE '"', ESCAPE '"', NULL 'NULL')
+    (FORMAT CSV, HEADER TRUE, DELIMITER '\t', QUOTE '', ESCAPE '', NULL 'NULL', AUTO_DETECT FALSE)
 """)
 
 # Verify data import
