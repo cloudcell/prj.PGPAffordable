@@ -1,7 +1,7 @@
 import duckdb
 
 # Connect to (or create) the DuckDB database
-conn = duckdb.connect("bio_data.duckdb")
+conn = duckdb.connect("bio_data.duck.db")
 
 # Create "substances" table
 conn.execute("""

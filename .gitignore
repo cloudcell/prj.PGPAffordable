@@ -5,3 +5,5 @@ venv/*
 *.duckdb
 *.sqlite
 *.db
+.vscode/*
+
