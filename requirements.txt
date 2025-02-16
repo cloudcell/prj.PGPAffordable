@@ -2,3 +2,4 @@ duckdb
 rdkit
 pandas
 numpy
+google-cloud-bigquery
