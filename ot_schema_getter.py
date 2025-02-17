@@ -1,5 +1,7 @@
 """
 This script demonstrates how to query the schema of the Open Targets API using the GraphQL endpoint.
+
+Additional information: https://api.platform.opentargets.org/
 """
 
 import requests
