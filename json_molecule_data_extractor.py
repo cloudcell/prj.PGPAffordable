@@ -1,18 +1,36 @@
 import os
 import json
 import duckdb
-import pandas as pd
 
 # Define paths
 DATA_DIR = "data/202409XX/molecule"  # Change this to your actual directory path
 DUCKDB_PATH = "bio_data.duck.db"
 TEMP_TSV_PATH = "temp_data.tsv"  # Changed file extension to .tsv
+NULL = '<NULL>'
 
 # Initialize DuckDB connection
 con = duckdb.connect(DUCKDB_PATH)
 
 # Create a list to store parsed data
-data_list = []
+data_list = [[
+    "id",
+    "canonicalSmiles",
+    "inchiKey",
+    "drugType",
+    "blackBoxWarning",
+    "name",
+    "yearOfFirstApproval",
+    "maximumClinicalTrialPhase",
+    "hasBeenWithdrawn",
+    "isApproved",
+    "tradeNames",
+    "synonyms",
+    "crossReferences",
+    "childChemblIds",
+    "linkedDiseases",
+    "linkedTargets",
+    "description",
+]]
 
 # Iterate through files in the directory
 for filename in os.listdir(DATA_DIR):
@@ -24,35 +42,63 @@ for filename in os.listdir(DATA_DIR):
             with open(file_path, "r", encoding="utf-8") as f:
                 for line in f:
                     record = json.loads(line)
+                    # {
+                    #     "id": str,
+                    #     "canonicalSmiles": str,
+                    #     "inchiKey": str,
+                    #     "drugType": str,
+                    #     "blackBoxWarning": bool,
+                    #     "name": str,
+                    #     "yearOfFirstApproval": int,
+                    #     "maximumClinicalTrialPhase": float,
+                    #     "hasBeenWithdrawn": bool,
+                    #     "isApproved": bool,
+                    #     "tradeNames": [str, ...],
+                    #     "synonyms": [str, ...],
+                    #     "crossReferences": {
+                    #         "PubChem": [str, ...],
+                    #         "Wikipedia": [str, ...],
+                    #         ...
+                    #     },
+                    #     "childChemblIds": [str, ...],
+                    #     "linkedDiseases": {
+                    #         "rows": [str, ...],
+                    #         "count": int
+                    #     },
+                    #     "linkedTargets": {
+                    #         "rows": [str, ...],
+                    #         "count": int
+                    #     },
+                    #     "description": str
+                    # }
 
                     # Extract relevant fields
-                    data_list.append({
-                        "id": record.get("id"),
-                        "canonicalSmiles": record.get("canonicalSmiles"),
-                        "inchiKey": record.get("inchiKey"),
-                        "drugType": record.get("drugType"),
-                        "blackBoxWarning": record.get("blackBoxWarning"),
-                        "name": record.get("name"),
-                        "yearOfFirstApproval": record.get("yearOfFirstApproval"),
-                        "maximumClinicalTrialPhase": record.get("maximumClinicalTrialPhase"),
-                        "hasBeenWithdrawn": record.get("hasBeenWithdrawn"),
-                        "isApproved": record.get("isApproved"),
-                        "tradeNames": "|".join(record.get("tradeNames", [])),  # Convert list to TSV-friendly format
-                        "synonyms": "|".join(record.get("synonyms", [])),  # Convert list to TSV-friendly format
-                        "crossReferences": json.dumps(record.get("crossReferences", {})),  # Store as JSON string
-                        "linkedDiseases": json.dumps(record.get("linkedDiseases", {})),  # Store as JSON string
-                        "linkedTargets": json.dumps(record.get("linkedTargets", {})),  # Store as JSON string
-                        "description": record.get("description"),
-                    })
+                    data_list.append([
+                        record["id"].replace('\t', ' ').strip(),
+                        record.get("canonicalSmiles", NULL).replace('\t', ' ').strip(),
+                        record.get("inchiKey", NULL).replace('\t', ' ').strip(),
+                        record.get("drugType", NULL).replace('\t', ' ').strip(),
+                        record.get("blackBoxWarning", NULL),
+                        record.get("name", NULL).replace('\t', ' ').strip(),
+                        record.get("yearOfFirstApproval", NULL),
+                        record.get("maximumClinicalTrialPhase", NULL),
+                        record.get("hasBeenWithdrawn", NULL),
+                        record.get("isApproved", NULL),
+                        json.dumps([a.replace('\t', ' ').strip() for a in record.get("tradeNames", [])]),  # Store as JSON string
+                        json.dumps([a.replace('\t', ' ').strip() for a in record.get("synonyms", [])]),  # Store as JSON string
+                        json.dumps({k.replace('\t', ' ').strip(): [a.replace('\t', ' ').strip() for a in v] for k, v in record.get("crossReferences", {}).items()}),  # Store as JSON string
+                        json.dumps([a.replace('\t', ' ').strip() for a in record.get("childChemblIds", [])]),  # Store as JSON string
+                        json.dumps([a.replace('\t', ' ').strip() for a in record.get("linkedDiseases", {}).get("rows", [])]),  # Store as JSON string
+                        json.dumps([a.replace('\t', ' ').strip() for a in record.get("linkedTargets", {}).get("rows", [])]),  # Store as JSON string
+                        record.get("description", NULL).replace('\t', ' ').strip(),
+                    ])
 
         except Exception as e:
             print(f"Error processing {filename}: {e}")
 
-# Convert list to DataFrame
-df = pd.DataFrame(data_list)
-
-# Save DataFrame to a temporary TSV file with no extra quoting
-df.to_csv(TEMP_TSV_PATH, index=False, sep="\t", quoting=0, escapechar="")
+# Save to tsv file
+with open(TEMP_TSV_PATH, 'w') as f:
+    f.write('\n'.join('\t'.join(map(str, row)) for row in data_list))
 
 # Create a table in DuckDB and import TSV data
 con.execute("""
@@ -67,11 +113,12 @@ con.execute("""
         maximumClinicalTrialPhase FLOAT,
         hasBeenWithdrawn BOOLEAN,
         isApproved BOOLEAN,
-        tradeNames TEXT,
-        synonyms TEXT,
+        tradeNames TEXT[],
+        synonyms TEXT[],
         crossReferences TEXT,
-        linkedDiseases TEXT,
-        linkedTargets TEXT,
+        childChemblIds TEXT[],
+        linkedDiseases TEXT[],
+        linkedTargets TEXT[],
         description TEXT
     )
 """)
@@ -79,12 +126,12 @@ con.execute("""
 # Copy data into DuckDB with strict mode disabled
 con.execute(f"""
     COPY molecules FROM '{TEMP_TSV_PATH}'
-    (FORMAT CSV, HEADER TRUE, DELIMITER '\t', QUOTE '', ESCAPE '', NULL 'NULL', AUTO_DETECT FALSE)
+    (FORMAT CSV, HEADER TRUE, DELIMITER '\t', QUOTE '', ESCAPE '', NULL '{NULL}', AUTO_DETECT FALSE)
 """)
 
 # Verify data import
-result = con.execute("SELECT * FROM molecules LIMIT 5").fetchdf()
-print(result)
+con.sql("SELECT * FROM molecules LIMIT 20").show()
+print(f'Total: {con.execute("SELECT count(*) FROM molecules").fetchone()[0]} rows')
 
 # Cleanup
 con.close()
