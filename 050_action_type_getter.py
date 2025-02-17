@@ -46,7 +46,7 @@ for actionType in sorted(action_type_list):
     print(actionType)
     v = ACTION_TYPES.get(actionType)
     params = {'actionType': actionType, 'value': v}
-    con.execute('INSERT INTO action_types VALUES ($actionType, $value) ON CONFLICT DO UPDATE SET value = EXCLUDED.value;', params)
+    con.execute('INSERT OR REPLACE INTO action_types VALUES ($actionType, $value);', params)
 
 con.sql('SELECT * FROM action_types').show()
 
