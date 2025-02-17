@@ -38,6 +38,7 @@ con = duckdb.connect("bio_data.duck.db")
 
 # Query the molecules table to get IDs
 molecule_ids = con.execute("SELECT id FROM molecules").fetchall()
+con.close()
 
 # Convert to a list of IDs
 molecule_ids = [row[0] for row in molecule_ids]

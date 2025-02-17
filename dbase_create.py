@@ -25,7 +25,7 @@ conn.execute("""
 CREATE TABLE IF NOT EXISTS refs (
     ref_id STRING PRIMARY KEY,
     ref_source STRING,
-    ref_data JSON
+    ref_data STRING[]
 );
 """)
 
