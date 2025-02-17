@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS actions (
 data_dir = "data_tmp"
 
 # Process each JSON file
-for filename in tqdm(os.listdir(data_dir)[:10]):
+for filename in tqdm(os.listdir(data_dir)[:100]):
     if filename.startswith("mol_") and filename.endswith(".json"):
         file_path = os.path.join(data_dir, filename)
         
