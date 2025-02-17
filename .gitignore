@@ -8,3 +8,6 @@ venv/*
 .vscode/*
 data/*/*
 *.csv
+data_tmp/*
+!data_tmp/README.md
+

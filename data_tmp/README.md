@@ -1,0 +1,1 @@
+This folder contains intermediary files for the project.
