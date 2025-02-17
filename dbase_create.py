@@ -24,8 +24,8 @@ CREATE TABLE IF NOT EXISTS targets (
 conn.execute("""
 CREATE TABLE IF NOT EXISTS refs (
     ref_id STRING PRIMARY KEY,
-    reference_source STRING,
-    reference_data JSON
+    ref_source STRING,
+    ref_data JSON
 );
 """)
 

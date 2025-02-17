@@ -31,15 +31,15 @@ CREATE TABLE IF NOT EXISTS actions (
     reference_id TEXT,
     FOREIGN KEY (ChEMBL_id) REFERENCES substances(ChEMBL_id),
     FOREIGN KEY (target_id) REFERENCES targets(target_id),
-    FOREIGN KEY (reference_id) REFERENCES references(reference_id)
+    FOREIGN KEY (reference_id) REFERENCES refs(ref_id)
 )
 """)
 
 con.execute("""
-CREATE TABLE IF NOT EXISTS references (
-    reference_id TEXT PRIMARY KEY,
-    reference_source TEXT,
-    references JSON
+CREATE TABLE IF NOT EXISTS refs (
+    ref_id TEXT PRIMARY KEY,
+    ref_source TEXT,
+    ref_data JSON
 )
 """)
 
