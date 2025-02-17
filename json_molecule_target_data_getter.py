@@ -30,6 +30,7 @@ from time import sleep
 
 import duckdb
 import requests
+from tqdm import tqdm
 
 
 # Connect to DuckDB
@@ -81,8 +82,7 @@ def fetch_drug_data(chembl_id):
         return None
 
 # Fetch data for first 5 IDs and save to files
-for i, chembl_id in enumerate(sorted(molecule_ids), 1):
-    print(f'{i}/{len(molecule_ids)} {chembl_id}                  ', end='\r')
+for chembl_id in tqdm(sorted(molecule_ids)):
     output_file = f"data_tmp/mol_{chembl_id}.json"
     output_file_tmp = 'data_tmp/mol_tmp'
     if os.path.exists(output_file):
