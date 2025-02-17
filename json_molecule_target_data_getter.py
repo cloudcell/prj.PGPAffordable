@@ -82,7 +82,7 @@ def fetch_drug_data(chembl_id):
         return None
 
 # Fetch data for first 5 IDs and save to files
-for chembl_id in tqdm(sorted(molecule_ids)):
+for chembl_id in tqdm(sorted(molecule_ids), smoothing=1):
     output_file = f"data_tmp/mol_{chembl_id}.json"
     output_file_tmp = 'data_tmp/mol_tmp'
     if os.path.exists(output_file):
