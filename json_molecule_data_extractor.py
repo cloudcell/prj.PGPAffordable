@@ -5,8 +5,8 @@ import duckdb
 # Define paths
 DATA_DIR = "data/202409XX/molecule"  # Change this to your actual directory path
 DUCKDB_PATH = "bio_data.duck.db"
-TEMP_TSV_PATH = "temp_data.tsv"  # Changed file extension to .tsv
-NULL = '<NULL>'
+TEMP_TSV_PATH = "data_tmp/temp_data.tsv"  # Changed file extension to .tsv
+NULL = '<NULL>'  # Define NULL value "string" in temporary TSV file
 
 # Initialize DuckDB connection
 con = duckdb.connect(DUCKDB_PATH)
