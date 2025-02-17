@@ -23,6 +23,7 @@
 # }
 # "
 
+import json
 from time import sleep
 import duckdb
 import requests
@@ -39,35 +40,8 @@ molecule_ids = [row[0] for row in molecule_ids]
 # Print first few IDs to check
 print(molecule_ids[:5])
 
-for chembl_id in molecule_ids:
-    query = f"""
-    query {{
-      drug(chemblId: "{chembl_id}") {{
-        name
-        tradeNames
-        mechanismsOfAction {{
-          rows {{
-            actionType
-            mechanismOfAction
-            references {{
-              source
-              urls
-            }}
-            targets {{
-              id
-              approvedName
-            }}
-          }}
-        }}
-      }}
-    }}
-    """
-    print(query)  # Print query for verification
-
-
-
 # GraphQL endpoint (modify if needed)
-GRAPHQL_ENDPOINT = "https://api.opentargets.io/v3/platform/graphql"
+GRAPHQL_ENDPOINT = "https://api.platform.opentargets.org/api/v4/graphql"
 
 # Function to send request
 def fetch_drug_data(chembl_id):
@@ -103,7 +77,8 @@ def fetch_drug_data(chembl_id):
         return None
 
 # Fetch data for first 5 IDs and save to files
-for chembl_id in molecule_ids[:5]:
+for i, chembl_id in enumerate(sorted(molecule_ids), 1):
+    print(f'{i}/{len(molecule_ids)} {chembl_id}                  ', end='\r')
     drug_data = fetch_drug_data(chembl_id)
     sleep(0.5)  # Respect API rate limits
 
@@ -111,6 +86,5 @@ for chembl_id in molecule_ids[:5]:
         output_file = f"data_tmp/mol_{chembl_id}.json"
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(drug_data, f, indent=4)
-        print(f"✅ Saved: {output_file}")
     else:
         print(f"⚠️ No data found for {chembl_id}")
