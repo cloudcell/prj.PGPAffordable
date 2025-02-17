@@ -23,10 +23,14 @@
 # }
 # "
 
+import os
 import json
+import shutil
 from time import sleep
+
 import duckdb
 import requests
+
 
 # Connect to DuckDB
 con = duckdb.connect("bio_data.duck.db")
@@ -79,12 +83,16 @@ def fetch_drug_data(chembl_id):
 # Fetch data for first 5 IDs and save to files
 for i, chembl_id in enumerate(sorted(molecule_ids), 1):
     print(f'{i}/{len(molecule_ids)} {chembl_id}                  ', end='\r')
+    output_file = f"data_tmp/mol_{chembl_id}.json"
+    output_file_tmp = 'data_tmp/mol_tmp'
+    if os.path.exists(output_file):
+        continue
     drug_data = fetch_drug_data(chembl_id)
     sleep(0.5)  # Respect API rate limits
 
     if drug_data:
-        output_file = f"data_tmp/mol_{chembl_id}.json"
-        with open(output_file, "w", encoding="utf-8") as f:
+        with open(output_file_tmp, "w", encoding="utf-8") as f:
             json.dump(drug_data, f, indent=4)
+        shutil.move(output_file_tmp, output_file)
     else:
         print(f"⚠️ No data found for {chembl_id}")
