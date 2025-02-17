@@ -100,29 +100,6 @@ for filename in os.listdir(DATA_DIR):
 with open(TEMP_TSV_PATH, 'w') as f:
     f.write('\n'.join('\t'.join(map(str, row)) for row in data_list))
 
-# Create a table in DuckDB and import TSV data
-con.execute("""
-    CREATE TABLE IF NOT EXISTS molecules (
-        id TEXT PRIMARY KEY,
-        canonicalSmiles TEXT,
-        inchiKey TEXT,
-        drugType TEXT,
-        blackBoxWarning BOOLEAN,
-        name TEXT,
-        yearOfFirstApproval INT,
-        maximumClinicalTrialPhase FLOAT,
-        hasBeenWithdrawn BOOLEAN,
-        isApproved BOOLEAN,
-        tradeNames TEXT[],
-        synonyms TEXT[],
-        crossReferences TEXT,
-        childChemblIds TEXT[],
-        linkedDiseases TEXT[],
-        linkedTargets TEXT[],
-        description TEXT
-    )
-""")
-
 # Copy data into DuckDB with strict mode disabled
 con.execute(f"""
     COPY molecules FROM '{TEMP_TSV_PATH}'
