@@ -51,7 +51,7 @@ for filename in tqdm(os.listdir(data_dir)):
                 params = {'target_id': target_id, 'target_name': target_name}
                 con.execute(q, params)
 
-                action_id = f"ref_{chembl_id}_{target_id}"
+                action_id = f"{chembl_id}_{target_id}"
 
                 # Insert into actions table
                 q = 'INSERT OR IGNORE INTO actions VALUES ($action_id, $chembl_id, $target_id, $actionType, $mechanismOfAction)'
