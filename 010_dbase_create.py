@@ -88,6 +88,13 @@ CREATE TABLE IF NOT EXISTS diseases (
 );
 """)
 
+conn.execute("""
+CREATE TABLE IF NOT EXISTS action_types (
+    actionType STRING PRIMARY KEY,
+    value FLOAT
+);
+""")
+
 # Commit and close connection
 conn.close()
 
