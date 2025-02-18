@@ -14,35 +14,24 @@ from scipy.spatial.distance import cosine
 db_path = "bio_data.duck.db"
 con = duckdb.connect(db_path)
 
-# Fetch all molecular vectors
-vectors_query = "SELECT ChEMBL_id, vector FROM molecular_vectors"
-vector_data = con.execute(vectors_query).fetchall()
+# Fetch all molecular vectors from vector_array
+df = con.execute("SELECT * FROM vector_array").fetchdf()
 
-# Convert to dictionary
-molecular_vectors = {}
-for chembl_id, vector_json in tqdm(vector_data, desc="Loading vectors"):
-    molecular_vectors[chembl_id] = json.loads(vector_json)
-
-# Get all ChEMBL IDs
-chembl_ids = list(molecular_vectors.keys())
-n = len(chembl_ids)
+# Extract ChEMBL IDs and convert dataframe to dictionary
+chembl_ids = df["ChEMBL_id"].tolist()
+vector_data = df.drop(columns=["ChEMBL_id"]).to_dict(orient="index")
 
 # Initialize rank matrix DataFrame
 rank_matrix = pd.DataFrame(index=chembl_ids, columns=chembl_ids, dtype=np.float32).fillna(0.0)
 
 # Compute cosine similarity for ranking
 for i, chembl_id_1 in enumerate(tqdm(chembl_ids, desc="Computing similarity")):
-    vec_1 = molecular_vectors[chembl_id_1]
+    vec_1 = np.array(list(vector_data[i].values()), dtype=np.float32)
     for j, chembl_id_2 in enumerate(chembl_ids[i+1:], start=i+1):
-        vec_2 = molecular_vectors[chembl_id_2]
-        
-        # Convert to aligned vectors
-        common_keys = set(vec_1.keys()).union(set(vec_2.keys()))
-        v1 = np.array([vec_1.get(k, 0) for k in common_keys], dtype=np.float32)
-        v2 = np.array([vec_2.get(k, 0) for k in common_keys], dtype=np.float32)
+        vec_2 = np.array(list(vector_data[j].values()), dtype=np.float32)
         
         # Compute cosine similarity
-        similarity = 1 - cosine(v1, v2)
+        similarity = 1 - cosine(vec_1, vec_2)
         
         # Store in matrix
         rank_matrix.at[chembl_id_1, chembl_id_2] = similarity
@@ -72,4 +61,3 @@ con.sql("SELECT * FROM rank_matrix LIMIT 10").show()
 con.close()
 
 print("✅ Matrix of ranks creation completed and stored in DuckDB.")
-
