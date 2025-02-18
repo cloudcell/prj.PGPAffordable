@@ -5,7 +5,7 @@ search_input = input("Enter a trade name or molecule name: ").strip()
 
 k = 200  # Number of top similarities to retrieve
 SHOW_SELF = True  # Ensure self is always listed first if True
-ZERO_THRESHOLD = 0.0000  # Threshold for zero similarity
+ZERO_THRESHOLD = 0.0000  # Threshold for filtering out low similarity values
 
 db_path = "bio_data.duck.db"
 con = duckdb.connect(db_path)
@@ -56,9 +56,10 @@ if values is not None:
 
         similarity_value = float(value)  # Ensure numeric conversion
 
-        if column_name == chembl_id:  # Store self-similarity separately
+        # Store self-similarity separately
+        if column_name == chembl_id:
             self_similarity = (column_name, similarity_value, trade_name, molecule_name)
-        else:
+        elif similarity_value > ZERO_THRESHOLD:  # Filter out low similarity values
             # Fetch trade name & molecule name for similarity results
             trade_name_res = con.execute(
                 """SELECT DISTINCT COALESCE(t.trade_name, 'N/A') AS trade_name, 
