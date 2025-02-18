@@ -11,9 +11,10 @@ con = duckdb.connect(db_path)
 
 # Search for matching ChEMBL IDs based on trade name
 query = """
-    SELECT DISTINCT ChEMBL_id, trade_name 
-    FROM drug_table
-    WHERE trade_name ILIKE ?
+    SELECT DISTINCT m.id AS ChEMBL_id, t.trade_name
+    FROM molecules m
+    CROSS JOIN UNNEST(m.tradeNames) AS t(trade_name)
+    WHERE t.trade_name ILIKE ?
 """
 matching_drugs = con.execute(query, [f"%{trade_name_input}%"]).fetchdf()
 
@@ -55,7 +56,7 @@ if values is not None:
         else:
             # Fetch trade name for similarity results
             trade_name_res = con.execute(
-                "SELECT trade_name FROM drug_table WHERE ChEMBL_id = ?", [column_name]
+                "SELECT DISTINCT t.trade_name FROM molecules m CROSS JOIN UNNEST(m.tradeNames) AS t(trade_name) WHERE m.id = ?", [column_name]
             ).fetchone()
             associated_trade_name = trade_name_res[0] if trade_name_res else "N/A"
             top_k_list.append((column_name, similarity_value, associated_trade_name))
