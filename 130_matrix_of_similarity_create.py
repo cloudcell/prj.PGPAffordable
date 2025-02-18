@@ -16,7 +16,7 @@ con = duckdb.connect(db_path)
 df = con.execute("SELECT * FROM vector_array").fetchdf()
 
 # Extract ChEMBL IDs and convert dataframe to dictionary
-chembl_ids = df["ChEMBL_id"].tolist()[:100]
+chembl_ids = df["ChEMBL_id"].tolist()  #[:100]
 vector_data = df.drop(columns=["ChEMBL_id"]).to_dict(orient="index")
 
 # Initialize dot product similarity matrix DataFrame
@@ -67,20 +67,20 @@ con.close()
 
 print("✅ Dot product similarity matrix creation completed and stored in DuckDB.")
 
-# make a heatmap of the similarity matrix
-import seaborn as sns
-import matplotlib.pyplot as plt
+# # make a heatmap of the similarity matrix
+# import seaborn as sns
+# import matplotlib.pyplot as plt
 
-# Load the similarity matrix from DuckDB
-con = duckdb.connect(db_path)
-similarity_matrix = con.execute("SELECT * FROM similarity_matrix").fetchdf().set_index("ChEMBL_id")
+# # Load the similarity matrix from DuckDB
+# con = duckdb.connect(db_path)
+# similarity_matrix = con.execute("SELECT * FROM similarity_matrix").fetchdf().set_index("ChEMBL_id")
 
-# Plot the similarity matrix as a heatmap with labels for every ChEMBL ID
-plt.figure(figsize=(12, 10))
-sns.heatmap(similarity_matrix, cmap="viridis", xticklabels=True, yticklabels=True)
-plt.title("Cosine Similarity Matrix of Molecular Profiles")
-plt.xlabel("ChEMBL ID")
-plt.ylabel("ChEMBL ID")
-plt.show()
+# # Plot the similarity matrix as a heatmap with labels for every ChEMBL ID
+# plt.figure(figsize=(12, 10))
+# sns.heatmap(similarity_matrix, cmap="viridis", xticklabels=True, yticklabels=True)
+# plt.title("Cosine Similarity Matrix of Molecular Profiles")
+# plt.xlabel("ChEMBL ID")
+# plt.ylabel("ChEMBL ID")
+# plt.show()
 
 
