@@ -3,4 +3,7 @@ tqdm
 rdkit
 pandas
 numpy
-google-cloud-bigquery
+# google-cloud-bigquery
+scipy
+
+
