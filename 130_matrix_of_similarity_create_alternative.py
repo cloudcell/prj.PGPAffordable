@@ -17,11 +17,11 @@ con = duckdb.connect(db_path)
 # Fetch all molecular vectors from vector_array
 df = con.execute("SELECT * FROM vector_array").fetchdf()
 
-# Extract ChEMBL IDs and convert dataframe to dictionary
-chembl_ids = df["ChEMBL_id"].tolist()
-vector_data = df.set_index("ChEMBL_id").fillna(0.0).to_dict(orient="index")
+# Extract first 10 ChEMBL IDs and subset dataframe
+chembl_ids = df["ChEMBL_id"].tolist()[:100]
+vector_data = df.set_index("ChEMBL_id").fillna(0.0).loc[chembl_ids].to_dict(orient="index")
 
-# Initialize cosine similarity matrix DataFrame
+# Initialize 10x10 cosine similarity matrix DataFrame
 cosine_similarity_matrix = pd.DataFrame(index=chembl_ids, columns=chembl_ids, dtype=np.float32).fillna(0.0)
 
 # Compute cosine similarity for ranking using raw vectors
@@ -37,10 +37,13 @@ for i, chembl_id_1 in enumerate(tqdm(chembl_ids, desc="Computing similarity")):
         cosine_similarity_matrix.at[chembl_id_1, chembl_id_2] = similarity
         cosine_similarity_matrix.at[chembl_id_2, chembl_id_1] = similarity
 
+# Drop the existing table if it exists to prevent column mismatch
+con.execute("DROP TABLE IF EXISTS cosine_similarity_matrix;")
+
 # Create a new table for storing the cosine similarity matrix
 column_definitions = ", ".join([f'"{col}" FLOAT' for col in chembl_ids])
 create_table_query = f"""
-    CREATE TABLE IF NOT EXISTS cosine_similarity_matrix (
+    CREATE TABLE cosine_similarity_matrix (
         ChEMBL_id STRING PRIMARY KEY, {column_definitions}
     )
 """
@@ -60,4 +63,25 @@ con.sql("SELECT * FROM cosine_similarity_matrix LIMIT 10").show()
 # Close connection
 con.close()
 
-print("✅ Cosine similarity matrix creation completed and stored in DuckDB.")
+print("✅ 100x100 Cosine similarity matrix creation completed and stored in DuckDB.")
+
+# plot the matrix of similarity as a heatmap marking every rown and column with the ChEMBL ID
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Load the cosine similarity matrix from DuckDB
+con = duckdb.connect(db_path)
+cosine_similarity_matrix = con.execute("SELECT * FROM cosine_similarity_matrix").fetchdf()
+con.close()
+
+# Set ChEMBL ID as index
+cosine_similarity_matrix.set_index("ChEMBL_id", inplace=True)
+
+# Plot the heatmap
+plt.figure(figsize=(12, 10))
+
+sns.heatmap(cosine_similarity_matrix, cmap="viridis", cbar_kws={"label": "Cosine Similarity"})
+plt.title("Cosine Similarity Matrix of Molecular Profiles")
+plt.xlabel("ChEMBL ID")
+plt.ylabel("ChEMBL ID")
+plt.show()
