@@ -22,16 +22,17 @@ if values is not None:
         if column_name == "ChEMBL_id":
             continue
         
-        try:
-            similarity_value = float(value)  # Ensure numeric conversion
-            
-            if column_name == chembl_id:  # Store self-similarity separately
-                self_similarity = (column_name, similarity_value)
-            else:
-                top_k_list.append((column_name, similarity_value))
+        # try:
+        similarity_value = float(value)  # Ensure numeric conversion
         
-        except ValueError:
-            continue  # Skip non-numeric values
+        if column_name == chembl_id:  # Store self-similarity separately
+            self_similarity = (column_name, similarity_value)
+        else:
+            top_k_list.append((column_name, similarity_value))
+    
+        # except ValueError:
+        #     print(f'Skipping non-numeric value: {value}')  # Skip non-numeric values
+        #     continue  # Skip non-numeric values
 
     # Sort other similarities in descending order
     top_k_list.sort(key=lambda x: -x[1])
