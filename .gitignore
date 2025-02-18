@@ -5,6 +5,7 @@ venv/*
 *.duckdb
 *.sqlite
 *.db
+*.wal
 .vscode/*
 data/*/*
 *.csv
