@@ -84,7 +84,18 @@ CREATE TABLE IF NOT EXISTS refs (
 conn.execute("""
 CREATE TABLE IF NOT EXISTS diseases (
     disease_id STRING PRIMARY KEY,
-    disease_name STRING
+    name STRING,
+    description STRING
+);
+""")
+
+conn.execute("""
+CREATE TABLE IF NOT EXISTS disease_target (
+    disease_id STRING,
+    target_id STRING,
+    PRIMARY KEY(disease_id, target_id),
+    FOREIGN KEY (disease_id) REFERENCES diseases(disease_id),
+    FOREIGN KEY (target_id) REFERENCES targets(target_id)
 );
 """)
 
