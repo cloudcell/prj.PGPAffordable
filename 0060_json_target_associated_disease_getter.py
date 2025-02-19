@@ -1,4 +1,7 @@
 
+import os
+import json
+import shutil
 from time import sleep
 
 import duckdb
@@ -6,8 +9,11 @@ import requests
 from tqdm import tqdm
 
 
+data_dir = "data_tmp"
+
 con = duckdb.connect("bio_data.duck.db")
 targets = con.execute("SELECT target_id FROM targets").fetchall()
+con.close()
 
 # Convert to a list of IDs
 targets = [row[0] for row in targets]
@@ -44,30 +50,18 @@ def fetch_associated_diseases_data(target_id):
         print(f"Error fetching data for {target_id}: {response.status_code}")
         return None
 
+output_file_tmp = os.path.join(data_dir, 'target_disease_tmp')
 
 for target_id in tqdm(sorted(targets), smoothing=1):
+    output_file = os.path.join(data_dir, f'target_disease_{target_id}.json')
+    if os.path.exists(output_file):
+        continue
     associated_diseases_list = fetch_associated_diseases_data(target_id)
     sleep(0.5)  # Respect API rate limits
 
     if associated_diseases_list:
-        for row in associated_diseases_list:
-            disease_id = row['disease']['id']
-            name = row['disease']['name']
-            description = row['disease'].get('description')
-
-            q = 'INSERT OR IGNORE INTO diseases VALUES ($disease_id, $name, $description)'
-            params = {'disease_id': disease_id, 'name': name, 'description': description}
-            con.execute(q, params)
-
-            q = 'INSERT OR IGNORE INTO disease_target VALUES ($disease_id, $target_id)'
-            params = {'disease_id': disease_id, 'target_id': target_id}
-            con.execute(q, params)
+        with open(output_file_tmp, "w", encoding="utf-8") as f:
+            json.dump(associated_diseases_list, f, indent=4)
+        shutil.move(output_file_tmp, output_file)
     else:
         print(f"⚠️ No data found for {target_id}")
-
-
-con.sql("SELECT * FROM diseases LIMIT 10").show()
-print(f'diseases: {con.execute("SELECT count(*) FROM diseases").fetchone()[0]} rows')
-print(f'disease_target: {con.execute("SELECT count(*) FROM disease_target").fetchone()[0]} rows')
-
-con.close()

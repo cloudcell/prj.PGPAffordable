@@ -1,55 +1,27 @@
 
-from time import sleep
+import os
+import json
 
 import duckdb
-import requests
 from tqdm import tqdm
 
 
-con = duckdb.connect("bio_data.duck.db")
-targets = con.execute("SELECT target_id FROM targets").fetchall()
 
-# Convert to a list of IDs
-targets = [row[0] for row in targets]
+data_dir = "data_tmp"
 
-# Print first few IDs to check
-print(targets[:5])
+db_path = "bio_data.duck.db"
+con = duckdb.connect(db_path)
 
-# GraphQL endpoint (modify if needed)
-GRAPHQL_ENDPOINT = "https://api.platform.opentargets.org/api/v4/graphql"
+for filename in tqdm(os.listdir(data_dir)):
+    if filename.startswith("target_disease_") and filename.endswith(".json"):
+        file_path = os.path.join(data_dir, filename)
+        
+        with open(file_path, "r", encoding="utf-8") as f:
+            associated_diseases_list = json.load(f)
 
-# Function to send request
-def fetch_associated_diseases_data(target_id):
-    query = f"""
-    query {{
-        target(ensemblId: "{target_id}") {{
-            associatedDiseases {{
-                rows {{
-                    disease {{
-                        id
-                        name
-                        description
-                    }}
-                }}
-            }}
-        }}
-    }}
-    """
+        # Extract target_id
+        target_id = filename.replace("target_disease_", "").replace(".json", "")
 
-    response = requests.post(GRAPHQL_ENDPOINT, json={"query": query})
-
-    if response.status_code == 200:
-        return response.json().get('data', {}).get('target', {}).get('associatedDiseases', {}).get('rows', [])
-    else:
-        print(f"Error fetching data for {target_id}: {response.status_code}")
-        return None
-
-
-for target_id in tqdm(sorted(targets), smoothing=1):
-    associated_diseases_list = fetch_associated_diseases_data(target_id)
-    sleep(0.5)  # Respect API rate limits
-
-    if associated_diseases_list:
         for row in associated_diseases_list:
             disease_id = row['disease']['id']
             name = row['disease']['name']
@@ -62,8 +34,6 @@ for target_id in tqdm(sorted(targets), smoothing=1):
             q = 'INSERT OR IGNORE INTO disease_target VALUES ($disease_id, $target_id)'
             params = {'disease_id': disease_id, 'target_id': target_id}
             con.execute(q, params)
-    else:
-        print(f"⚠️ No data found for {target_id}")
 
 
 con.sql("SELECT * FROM diseases LIMIT 10").show()
@@ -71,3 +41,5 @@ print(f'diseases: {con.execute("SELECT count(*) FROM diseases").fetchone()[0]} r
 print(f'disease_target: {con.execute("SELECT count(*) FROM disease_target").fetchone()[0]} rows')
 
 con.close()
+
+print("✅ Data successfully written to DuckDB")
