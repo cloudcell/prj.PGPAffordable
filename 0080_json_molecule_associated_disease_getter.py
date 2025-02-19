@@ -46,7 +46,8 @@ def fetch_linked_diseases_data(chembl_id):
     response = requests.post(GRAPHQL_ENDPOINT, json={"query": query})
 
     if response.status_code == 200:
-        return response.json().get('data', {}).get('drug', {}).get('linkedDiseases', {}).get('rows', [])
+        linked_diseases = response.json().get('data', {}).get('drug', {}).get('linkedDiseases', {})
+        return linked_diseases.get('rows', []) if linked_diseases is not None else []
     else:
         print(f"Error fetching data for {chembl_id}: {response.status_code}")
         return None
@@ -61,7 +62,7 @@ for chembl_id in tqdm(sorted(molecule_ids), smoothing=1):
     linked_diseases_list = fetch_linked_diseases_data(chembl_id)
     sleep(0.5)  # Respect API rate limits
 
-    if linked_diseases_list:
+    if linked_diseases_list is not None:
         with open(output_file_tmp, "w", encoding="utf-8") as f:
             json.dump(linked_diseases_list, f, indent=4)
         shutil.move(output_file_tmp, output_file)
