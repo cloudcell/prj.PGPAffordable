@@ -8,7 +8,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-output_file = "similarity_matrix2.png"  # Output file name
+output_file = "similarity_matrix3.png"  # Output file name
 
 db_path = "bio_data.duck.db"
 con = duckdb.connect(db_path)
