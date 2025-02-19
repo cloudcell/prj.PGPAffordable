@@ -75,6 +75,36 @@ def get_disease_targets(disease_id: str):
     columns = [desc[0] for desc in conn.description]
     return [dict(zip(columns, row)) for row in results]
 
+@app.get("/search/molecules", response_model=List[Dict])
+def search_molecules(query: str):
+    """Search for molecules by partial name or tradename."""
+    query_str = """
+        SELECT * FROM molecules 
+        WHERE name ILIKE ? OR ? = ANY(tradeNames)
+    """
+    results = conn.execute(query_str, [f"%{query}%", query]).fetchall()
+    return [dict(zip([desc[0] for desc in conn.description], row)) for row in results]
+
+@app.get("/search/diseases", response_model=List[Dict])
+def search_diseases(query: str):
+    """Search for diseases by name or description."""
+    query_str = """
+        SELECT * FROM diseases 
+        WHERE name ILIKE ? OR description ILIKE ?
+    """
+    results = conn.execute(query_str, [f"%{query}%", f"%{query}%"]).fetchall()
+    return [dict(zip([desc[0] for desc in conn.description], row)) for row in results]
+
+@app.get("/search/targets", response_model=List[Dict])
+def search_targets(query: str):
+    """Search for targets by name or description."""
+    query_str = """
+        SELECT * FROM targets 
+        WHERE target_approvedName ILIKE ?
+    """
+    results = conn.execute(query_str, [f"%{query}%"]).fetchall()
+    return [dict(zip([desc[0] for desc in conn.description], row)) for row in results]
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
