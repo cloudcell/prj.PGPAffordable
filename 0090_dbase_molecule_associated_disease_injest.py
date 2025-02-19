@@ -23,9 +23,9 @@ for filename in tqdm(os.listdir(data_dir)):
         chembl_id = filename.replace("mol_disease_", "").replace(".json", "")
 
         for row in associated_diseases_list:
-            disease_id = row['disease']['id']
-            name = row['disease']['name']
-            description = row['disease'].get('description')
+            disease_id = row['id']
+            name = row['name']
+            description = row.get('description')
 
             q = 'INSERT OR IGNORE INTO diseases VALUES ($disease_id, $name, $description)'
             params = {'disease_id': disease_id, 'name': name, 'description': description}
