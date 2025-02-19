@@ -100,6 +100,16 @@ CREATE TABLE IF NOT EXISTS disease_target (
 """)
 
 conn.execute("""
+CREATE TABLE IF NOT EXISTS disease_substance (
+    disease_id STRING,
+    ChEMBL_id STRING,
+    PRIMARY KEY(disease_id, ChEMBL_id),
+    FOREIGN KEY (disease_id) REFERENCES diseases(disease_id),
+    FOREIGN KEY (ChEMBL_id) REFERENCES substances(ChEMBL_id)
+);
+""")
+
+conn.execute("""
 CREATE TABLE IF NOT EXISTS action_types (
     actionType STRING PRIMARY KEY,
     value FLOAT
