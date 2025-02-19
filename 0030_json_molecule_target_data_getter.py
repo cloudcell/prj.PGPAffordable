@@ -33,6 +33,8 @@ import requests
 from tqdm import tqdm
 
 
+data_dir = "data_tmp"
+
 # Connect to DuckDB
 con = duckdb.connect("bio_data.duck.db")
 
@@ -82,10 +84,11 @@ def fetch_drug_data(chembl_id):
         print(f"Error fetching data for {chembl_id}: {response.status_code}")
         return None
 
-# Fetch data for first 5 IDs and save to files
+output_file_tmp = os.path.join(data_dir, 'mol_target_tmp')
+
+# Fetch data and save to files
 for chembl_id in tqdm(sorted(molecule_ids), smoothing=1):
-    output_file = f"data_tmp/mol_target_{chembl_id}.json"
-    output_file_tmp = 'data_tmp/mol_target_tmp'
+    output_file = os.path.join(data_dir, f'mol_target_{chembl_id}.json')
     if os.path.exists(output_file):
         continue
     drug_data = fetch_drug_data(chembl_id)

@@ -14,7 +14,7 @@ data_dir = "data_tmp"
 
 # Process each JSON file
 for filename in tqdm(os.listdir(data_dir)):
-    if filename.startswith("mol_") and filename.endswith(".json"):
+    if filename.startswith("mol_target_") and filename.endswith(".json"):
         file_path = os.path.join(data_dir, filename)
         
         with open(file_path, "r", encoding="utf-8") as f:
@@ -22,7 +22,7 @@ for filename in tqdm(os.listdir(data_dir)):
 
         # Extract ChEMBL ID
         drug = data.get("data", {}).get("drug", {})
-        chembl_id = filename.replace("mol_", "").replace(".json", "")
+        chembl_id = filename.replace("mol_target_", "").replace(".json", "")
 
         # Insert into substances table
         name = drug.get("name")
