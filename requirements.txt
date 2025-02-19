@@ -6,4 +6,5 @@ numpy
 # google-cloud-bigquery
 scipy
 seaborn
-
+fastapi
+uvicorn
