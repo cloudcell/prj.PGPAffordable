@@ -3,7 +3,7 @@ import duckdb
 from typing import List, Dict
 
 # Initialize FastAPI app
-app = FastAPI(title="Molecular Database API", description="API for querying molecular similarity and target data", version="1.0")
+app = FastAPI(title="Affordable API", description="API for querying molecular similarity and target data", version="1.0")
 
 # Connect to DuckDB
 db_path = "bio_data.duck.db"
