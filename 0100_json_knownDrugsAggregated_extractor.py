@@ -90,7 +90,7 @@ for filename in os.listdir(DATA_DIR):
             print(f"Error processing {filename}: {e}")
 
 # Save to tsv file
-with open(TEMP_TSV_PATH, 'w') as f:
+with open(TEMP_TSV_PATH, 'w', encoding='utf-8') as f:
     f.write('\n'.join('\t'.join(map(str, row)) for row in data_list))
 
 # Copy data into DuckDB with strict mode disabled
