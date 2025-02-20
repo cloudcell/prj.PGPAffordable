@@ -45,9 +45,10 @@ target_list = target_ids["target_id"].tolist()
 print(f"Found {len(target_list)} target(s). Filtering compounds...")
 
 # Retrieve compounds associated with these targets
+formatted_targets = ','.join([f'"{t}"' for t in target_list])
 query = f"""
     SELECT DISTINCT chembl_id FROM compound_target_map
-    WHERE target_id IN ({','.join([f'\"{t}\"' for t in target_list])})
+    WHERE target_id IN ({formatted_targets})
 """
 chembl_ids = con.execute(query).fetchdf()
 
@@ -60,9 +61,10 @@ chembl_list = chembl_ids["chembl_id"].tolist()
 print(f"Found {len(chembl_list)} compounds.")
 
 # Fetch vector data
+formatted_chembls = ','.join([f'"{c}"' for c in chembl_list])
 query = f"""
     SELECT * FROM vector_array
-    WHERE chembl_id IN ({','.join([f'\"{c}\"' for c in chembl_list])})
+    WHERE chembl_id IN ({formatted_chembls})
 """
 df = con.execute(query).fetchdf()
 
