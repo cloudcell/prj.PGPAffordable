@@ -1,0 +1,110 @@
+import os
+import json
+import duckdb
+
+# Define paths
+DATA_DIR = "data/202409XX/knownDrugsAggregated"  # Change this to your actual directory path
+DUCKDB_PATH = "bio_data.duck.db"
+TEMP_TSV_PATH = "data_tmp/temp_data.tsv"  # Changed file extension to .tsv
+NULL = '<NULL>'  # Define NULL value "string" in temporary TSV file
+
+# Initialize DuckDB connection
+con = duckdb.connect(DUCKDB_PATH)
+
+# Create a list to store parsed data
+data_list = [[
+    "drugId",
+    "targetId",
+    "diseaseId",
+    "phase",
+    "status",
+    "urls",
+    "ancestors",
+    "label",
+    "approvedSymbol",
+    "approvedName",
+    "targetClass",
+    "prefName",
+    "tradeNames",
+    "synonyms",
+    "drugType",
+    "mechanismOfAction",
+    "targetName",
+]]
+
+# Iterate through files in the directory
+for filename in os.listdir(DATA_DIR):
+    if filename.startswith("part-") and filename.endswith(".json"):  # Adjust based on file format
+        file_path = os.path.join(DATA_DIR, filename)
+        
+        try:
+            # Read NDJSON (Newline Delimited JSON)
+            with open(file_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    record = json.loads(line)
+                    # {
+                    #     "drugId": str,
+                    #     "targetId": str,
+                    #     "diseaseId": str,
+                    #     "phase": float,
+                    #     "status": str,
+                    #     "urls": [
+                    #         {"niceName": str, "url": str},
+                    #         ...
+                    #     ],
+                    #     "ancestors": [str, str, ...],
+                    #     "label": str,
+                    #     "approvedSymbol": str,
+                    #     "approvedName": str,
+                    #     "targetClass": [str, str, ...],
+                    #     "prefName": str,
+                    #     "tradeNames": [str, str, ...],
+                    #     "synonyms": [str, str, ...],
+                    #     "drugType": str,
+                    #     "mechanismOfAction": str,
+                    #     "targetName": str
+                    # }
+
+                    # Extract relevant fields
+                    data_list.append([
+                        record["drugId"].replace('\t', ' ').strip(),
+                        record["targetId"].replace('\t', ' ').strip(),
+                        record["diseaseId"].replace('\t', ' ').strip(),
+                        record.get("phase", NULL),
+                        record.get("status", NULL).replace('\t', ' ').strip(),
+                        json.dumps([{k.replace('\t', ' ').strip(): v.replace('\t', ' ').strip() for k, v in a.items()} for a in record.get("urls", [])]),
+                        json.dumps([a.replace('\t', ' ').strip() for a in record.get("ancestors", [])]),
+                        record.get("label", NULL).replace('\t', ' ').strip(),
+                        record.get("approvedSymbol", NULL).replace('\t', ' ').strip(),
+                        record.get("approvedName", NULL).replace('\t', ' ').strip(),
+                        json.dumps([a.replace('\t', ' ').strip() for a in record.get("targetClass", [])]),
+                        record.get("prefName", NULL).replace('\t', ' ').strip(),
+                        json.dumps([a.replace('\t', ' ').strip() for a in record.get("tradeNames", [])]),
+                        json.dumps([a.replace('\t', ' ').strip() for a in record.get("synonyms", [])]),
+                        record.get("drugType", NULL).replace('\t', ' ').strip(),
+                        record.get("mechanismOfAction", NULL).replace('\t', ' ').strip(),
+                        record.get("targetName", NULL).replace('\t', ' ').strip(),
+                    ])
+
+        except Exception as e:
+            print(f"Error processing {filename}: {e}")
+
+# Save to tsv file
+with open(TEMP_TSV_PATH, 'w') as f:
+    f.write('\n'.join('\t'.join(map(str, row)) for row in data_list))
+
+# Copy data into DuckDB with strict mode disabled
+con.execute(f"""
+    COPY knownDrugsAggregated FROM '{TEMP_TSV_PATH}'
+    (FORMAT CSV, HEADER TRUE, DELIMITER '\t', QUOTE '', ESCAPE '', NULL '{NULL}', AUTO_DETECT FALSE)
+""")
+
+# Verify data import
+con.sql("SELECT * FROM knownDrugsAggregated LIMIT 20").show()
+print(f'Total: {con.execute("SELECT count(*) FROM knownDrugsAggregated").fetchone()[0]} rows')
+
+# Cleanup
+con.close()
+os.remove(TEMP_TSV_PATH)
+
+print("Data successfully imported into DuckDB as TSV.")

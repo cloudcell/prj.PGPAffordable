@@ -116,6 +116,28 @@ CREATE TABLE IF NOT EXISTS action_types (
 );
 """)
 
+conn.execute("""
+CREATE TABLE IF NOT EXISTS knownDrugsAggregated (
+    drugId STRING,
+    targetId STRING,
+    diseaseId STRING,
+    phase FLOAT,
+    status STRING,
+    urls STRING,
+    ancestors STRING[],
+    label STRING,
+    approvedSymbol STRING,
+    approvedName STRING,
+    targetClass STRING[],
+    prefName STRING,
+    tradeNames STRING[],
+    synonyms STRING[],
+    drugType STRING,
+    mechanismOfAction STRING,
+    targetName STRING
+);
+""")
+
 # Commit and close connection
 conn.close()
 
