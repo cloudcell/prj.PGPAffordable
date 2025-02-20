@@ -31,7 +31,7 @@ print(f"Using disease ID: {disease_id}")
 
 # Retrieve target IDs associated with the disease
 query = f"""
-    SELECT DISTINCT target_id FROM disease_target_map
+    SELECT DISTINCT target_id FROM disease_target
     WHERE disease_id = '{disease_id}'
 """
 target_ids = con.execute(query).fetchdf()
