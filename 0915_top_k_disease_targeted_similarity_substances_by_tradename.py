@@ -65,16 +65,18 @@ if compound_matches.empty:
     exit()
 
 if len(compound_matches) > 1:
-    print("\nMultiple matches found:\n")
-    for _, row in compound_matches.iterrows():
-        print(f"ChEMBL ID: {row['ChEMBL_id']} | Trade Name: {row['trade_name']} | Name: {row['molecule_name']}")
-    con.close()
-    exit()
+    print("\nMultiple compounds found. Please refine your selection:\n")
+    print(compound_matches.to_string(index=False))
+    ref_chembl_id = input("Enter the exact ChEMBL ID from the list: ").strip()
+    if ref_chembl_id not in compound_matches["ChEMBL_id"].values:
+        print("Invalid selection.")
+        con.close()
+        exit()
+else:
+    ref_chembl_id = compound_matches.iloc[0]['ChEMBL_id']
 
-# Unique match found
-ref_chembl_id = compound_matches.iloc[0]['ChEMBL_id']
-trade_name = compound_matches.iloc[0]['trade_name']
-molecule_name = compound_matches.iloc[0]['molecule_name']
+trade_name = compound_matches.loc[compound_matches["ChEMBL_id"] == ref_chembl_id, "trade_name"].values[0]
+molecule_name = compound_matches.loc[compound_matches["ChEMBL_id"] == ref_chembl_id, "molecule_name"].values[0]
 
 print(f"Using ChEMBL ID: {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name})")
 
@@ -106,7 +108,7 @@ for chembl_id, vector in vector_data.items():
     vec = np.array(list(vector.values()), dtype=np.float32)
     similarity = np.dot(vec_ref, vec) / (np.linalg.norm(vec_ref) * np.linalg.norm(vec))
     
-    # Filter out similarities <= 0
+    # Filter out similarities ≤ 0
     if similarity > 0:
         # Fetch molecule name from substances table
         name_query = "SELECT COALESCE(name, 'N/A') FROM substances WHERE chembl_id = ?"
@@ -134,4 +136,3 @@ for index, row in df_top_k.iterrows():
 
 # Close connection
 con.close()
-
