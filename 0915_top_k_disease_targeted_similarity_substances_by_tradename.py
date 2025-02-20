@@ -60,11 +60,25 @@ else:
 
 compound_matches = con.execute(query).fetchdf()
 
+# Debugging checks
 if compound_matches.empty:
     print("No matching compound found.")
+    print("Query executed:", query)  # Debugging output
     con.close()
     exit()
-elif len(compound_matches) > 1:
+
+print("Columns returned by the query:", compound_matches.columns.tolist())  # Debugging output
+
+# Normalize column names to avoid case sensitivity issues
+compound_matches.columns = compound_matches.columns.str.lower()
+
+if "chembl_id" not in compound_matches.columns:
+    print("Error: 'chembl_id' column not found in query result.")
+    print("Available columns:", compound_matches.columns.tolist())
+    con.close()
+    exit()
+
+if len(compound_matches) > 1:
     print("Multiple compounds found. Please refine your selection:")
     print(compound_matches.to_string(index=False))
     ref_chembl_id = input("Enter the exact ChEMBL ID from the list: ").strip()
@@ -75,6 +89,7 @@ elif len(compound_matches) > 1:
 else:
     ref_chembl_id = compound_matches.iloc[0]["chembl_id"]
     print(f"Using ChEMBL ID: {ref_chembl_id}")
+
 
 # ---------------------- VECTOR RETRIEVAL ----------------------
 query = "SELECT * FROM vector_array"
