@@ -15,7 +15,7 @@ if user_input.startswith(("EFO_", "DOID:")) or user_input.isdigit():
     disease_matches = con.execute(query, [user_input]).fetchdf()
 else:
     query = "SELECT disease_id, name, description FROM diseases WHERE name ILIKE ? OR description ILIKE ?"
-    disease_matches = con.execute(query, [f"%{user_input}%"]).fetchdf()
+    disease_matches = con.execute(query, [f"%{user_input}%", f"%{user_input}%"]).fetchdf()
 
 if disease_matches.empty:
     print("No matching disease found.")
