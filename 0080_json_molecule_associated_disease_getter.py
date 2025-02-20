@@ -60,7 +60,7 @@ for chembl_id in tqdm(sorted(molecule_ids), smoothing=1):
     if os.path.exists(output_file):
         continue
     linked_diseases_list = fetch_linked_diseases_data(chembl_id)
-    sleep(0.5)  # Respect API rate limits
+    sleep(0.1)  # Respect API rate limits
 
     if linked_diseases_list is not None:
         with open(output_file_tmp, "w", encoding="utf-8") as f:
