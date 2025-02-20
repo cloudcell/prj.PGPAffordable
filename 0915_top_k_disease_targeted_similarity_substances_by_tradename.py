@@ -50,11 +50,12 @@ compound_input = input("Enter the compound ChEMBL ID, name, or trade name: ").st
 
 # Try to find a matching compound by ChEMBL ID, name, or trade name
 if compound_input.startswith("CHEMBL"):
-    query = f"SELECT chembl_id, compound_name, trade_name FROM compounds WHERE chembl_id = '{compound_input}'"
+    query = f"SELECT chembl_id, name, tradeNames FROM substances WHERE chembl_id = '{compound_input}'"
 else:
     query = f"""
-        SELECT chembl_id, compound_name, trade_name FROM compounds 
-        WHERE compound_name ILIKE '%{compound_input}%' OR trade_name ILIKE '%{compound_input}%'
+        SELECT chembl_id, name, tradeNames FROM substances
+        WHERE name ILIKE '%{compound_input}%'
+        OR tradeNames::STRING ILIKE '%{compound_input}%'
     """
 
 compound_matches = con.execute(query).fetchdf()
