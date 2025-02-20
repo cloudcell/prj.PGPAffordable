@@ -1,91 +1,104 @@
-"""
-Create a ranked list from the sparse vectors representing molecular profiles stored in DuckDB.
-The list is based on cosine similarity between the vectors, where higher values indicate greater similarity.
-"""
-
 import duckdb
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-DISEASE_ID = "DOID:0050741"  
-CHEMBL_ID = "CHEMBL2105751"  
-
-# ----------------------------------------------------------------------------------------------------------------------
-
 # Connect to DuckDB database
 db_path = "bio_data.duck.db"
 con = duckdb.connect(db_path)
 
-# Fetch all molecular vectors from vector_array
-df = con.execute("SELECT * FROM vector_array").fetchdf()
+# Ask the user for disease name
+disease_name = input("Enter the disease name: ")
 
-# Extract ChEMBL IDs and convert dataframe to dictionary
-chembl_ids = df["ChEMBL_id"].tolist()  #[:100]
-vector_data = df.drop(columns=["ChEMBL_id"]).to_dict(orient="index")
-
-# Initialize dot product similarity matrix DataFrame
-similarity_matrix = pd.DataFrame(index=chembl_ids, columns=chembl_ids, dtype=np.float32).fillna(0.0)
-
-# Compute dot product similarity
-for i, chembl_id_1 in enumerate(tqdm(chembl_ids, desc="Computing similarity")):
-    vec_1 = np.array(list(vector_data[i].values()), dtype=np.float32)
-    
-    for j, chembl_id_2 in enumerate(chembl_ids[i+1:], start=i+1):
-        vec_2 = np.array(list(vector_data[j].values()), dtype=np.float32)
-        
-        # Compute similarity using dot product (without normalization)
-        similarity = np.dot(vec_1, vec_2)
-        
-        # Store in matrix
-        similarity_matrix.at[chembl_id_1, chembl_id_2] = similarity
-        similarity_matrix.at[chembl_id_2, chembl_id_1] = similarity
-    
-    # Set diagonal to self-dot product
-    similarity_matrix.at[chembl_id_1, chembl_id_1] = np.dot(vec_1, vec_1)
-
-# Drop the existing table if it exists
-con.execute("DROP TABLE IF EXISTS similarity_matrix;")
-
-# Create a new table for storing the similarity matrix
-column_definitions = ", ".join([f'"{col}" FLOAT' for col in chembl_ids])
-create_table_query = f"""
-    CREATE TABLE IF NOT EXISTS similarity_matrix (
-        ChEMBL_id STRING PRIMARY KEY, {column_definitions}
-    )
+# Retrieve the disease_id if the name is unique
+query = f"""
+    SELECT disease_id FROM disease_info
+    WHERE disease_name = '{disease_name}'
 """
-con.execute(create_table_query)
+disease_ids = con.execute(query).fetchall()
 
-# Insert data into DuckDB with progress bar
-data_tuples = [tuple([chembl_id] + row.tolist()) for chembl_id, row in similarity_matrix.iterrows()]
-placeholders = ", ".join(["?"] * (len(chembl_ids) + 1))
-insert_query = f"INSERT OR REPLACE INTO similarity_matrix VALUES ({placeholders})"
+if len(disease_ids) == 0:
+    print("No matching disease found.")
+    con.close()
+    exit()
+elif len(disease_ids) > 1:
+    print("Multiple diseases found. Please refine your query.")
+    con.close()
+    exit()
 
-for data in tqdm(data_tuples, desc="Inserting similarity matrix into DuckDB"):
-    con.execute(insert_query, data)
+disease_id = disease_ids[0][0]
+print(f"Using disease ID: {disease_id}")
 
-# Verify insertion
-con.sql("SELECT * FROM similarity_matrix LIMIT 10").show()
+# Retrieve target IDs associated with the disease
+query = f"""
+    SELECT DISTINCT target_id FROM disease_target_map
+    WHERE disease_id = '{disease_id}'
+"""
+target_ids = con.execute(query).fetchdf()
+
+if target_ids.empty:
+    print("No targets found for this disease.")
+    con.close()
+    exit()
+
+target_list = target_ids["target_id"].tolist()
+print(f"Found {len(target_list)} target(s). Filtering compounds...")
+
+# Retrieve compounds associated with these targets
+query = f"""
+    SELECT DISTINCT chembl_id FROM compound_target_map
+    WHERE target_id IN ({','.join([f'\"{t}\"' for t in target_list])})
+"""
+chembl_ids = con.execute(query).fetchdf()
+
+if chembl_ids.empty:
+    print("No compounds found for these targets.")
+    con.close()
+    exit()
+
+chembl_list = chembl_ids["chembl_id"].tolist()
+print(f"Found {len(chembl_list)} compounds.")
+
+# Fetch vector data
+query = f"""
+    SELECT * FROM vector_array
+    WHERE chembl_id IN ({','.join([f'\"{c}\"' for c in chembl_list])})
+"""
+df = con.execute(query).fetchdf()
+
+if df.empty:
+    print("No vector data found for selected compounds.")
+    con.close()
+    exit()
+
+# Extract ChEMBL IDs and vectors
+vector_data = df.set_index("chembl_id").to_dict(orient="index")
+
+# Ask the user for reference ChEMBL ID
+ref_chembl_id = input("Enter the reference ChEMBL ID: ")
+
+if ref_chembl_id not in vector_data:
+    print("Reference ChEMBL ID not found in dataset.")
+    con.close()
+    exit()
+
+vec_ref = np.array(list(vector_data[ref_chembl_id].values()), dtype=np.float32)
+
+# Compute cosine similarity
+similarities = {}
+for chembl_id, vector in vector_data.items():
+    vec = np.array(list(vector.values()), dtype=np.float32)
+    similarity = np.dot(vec_ref, vec) / (np.linalg.norm(vec_ref) * np.linalg.norm(vec))
+    similarities[chembl_id] = similarity
+
+# Rank and display results
+ranked_results = sorted(similarities.items(), key=lambda x: x[1], reverse=True)
+df_results = pd.DataFrame(ranked_results, columns=["ChEMBL ID", "Cosine Similarity"])
+
+# Display top-k results
+top_k = 10
+df_top_k = df_results.head(top_k)
+print(df_top_k)
 
 # Close connection
 con.close()
-
-print("✅ Dot product similarity matrix creation completed and stored in DuckDB.")
-
-# # make a heatmap of the similarity matrix
-# import seaborn as sns
-# import matplotlib.pyplot as plt
-
-# # Load the similarity matrix from DuckDB
-# con = duckdb.connect(db_path)
-# similarity_matrix = con.execute("SELECT * FROM similarity_matrix").fetchdf().set_index("ChEMBL_id")
-
-# # Plot the similarity matrix as a heatmap with labels for every ChEMBL ID
-# plt.figure(figsize=(12, 10))
-# sns.heatmap(similarity_matrix, cmap="viridis", xticklabels=True, yticklabels=True)
-# plt.title("Cosine Similarity Matrix of Molecular Profiles")
-# plt.xlabel("ChEMBL ID")
-# plt.ylabel("ChEMBL ID")
-# plt.show()
-
-
