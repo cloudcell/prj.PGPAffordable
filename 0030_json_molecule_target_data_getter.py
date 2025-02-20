@@ -92,7 +92,7 @@ for chembl_id in tqdm(sorted(molecule_ids), smoothing=1):
     if os.path.exists(output_file):
         continue
     drug_data = fetch_drug_data(chembl_id)
-    sleep(0.5)  # Respect API rate limits
+    sleep(0.1)  # Respect API rate limits
 
     if drug_data:
         with open(output_file_tmp, "w", encoding="utf-8") as f:
