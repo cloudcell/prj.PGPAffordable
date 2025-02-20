@@ -1,7 +1,6 @@
 import duckdb
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
 
 # Connect to DuckDB database
 db_path = "bio_data.duck.db"
@@ -12,18 +11,18 @@ user_input = input("Enter the disease name or ID: ").strip()
 
 # Check if input is a disease ID
 if user_input.startswith(("EFO_", "DOID:")) or user_input.isdigit():
-    query = f"SELECT disease_id, description FROM diseases WHERE disease_id = '{user_input}'"
+    query = "SELECT disease_id, description FROM diseases WHERE disease_id = ?"
+    disease_matches = con.execute(query, [user_input]).fetchdf()
 else:
-    query = f"SELECT disease_id, description FROM diseases WHERE description ILIKE '%{user_input}%'"
-
-disease_matches = con.execute(query).fetchdf()
+    query = "SELECT disease_id, description FROM diseases WHERE description ILIKE ?"
+    disease_matches = con.execute(query, [f"%{user_input}%"]).fetchdf()
 
 if disease_matches.empty:
     print("No matching disease found.")
     con.close()
     exit()
 elif len(disease_matches) > 1:
-    print("Multiple diseases found. Please refine your selection:")
+    print("\nMultiple diseases found:\n")
     print(disease_matches.to_string(index=False))
     disease_id = input("Enter the exact disease ID from the list: ").strip()
     if disease_id not in disease_matches["disease_id"].values:
@@ -35,8 +34,8 @@ else:
     print(f"Using disease ID: {disease_id}")
 
 # ---------------------- TARGET SELECTION ----------------------
-query = f"SELECT DISTINCT target_id FROM disease_target WHERE disease_id = '{disease_id}'"
-target_ids = con.execute(query).fetchdf()
+query = "SELECT DISTINCT target_id FROM disease_target WHERE disease_id = ?"
+target_ids = con.execute(query, [disease_id]).fetchdf()
 
 if target_ids.empty:
     print("No targets found for this disease.")
@@ -48,55 +47,43 @@ print(f"Found {len(target_ids)} target(s). Proceeding with full compound set.")
 # ---------------------- COMPOUND SELECTION ----------------------
 compound_input = input("Enter the compound ChEMBL ID, name, or trade name: ").strip()
 
-# Try to find a matching compound by ChEMBL ID, name, or trade name
-if compound_input.startswith("CHEMBL"):
-    query = f"SELECT chembl_id, name, tradeNames FROM substances WHERE chembl_id = '{compound_input}'"
-else:
-    query = f"""
-        SELECT chembl_id, name, tradeNames FROM substances
-        WHERE name ILIKE '%{compound_input}%'
-        OR tradeNames::STRING ILIKE '%{compound_input}%'
-    """
+query = """
+    SELECT DISTINCT chembl_id AS ChEMBL_id, 
+           COALESCE(name, 'N/A') AS molecule_name, 
+           COALESCE(tradeNames::STRING, 'N/A') AS trade_name
+    FROM substances
+    WHERE chembl_id = ?
+       OR name ILIKE ?
+       OR tradeNames::STRING ILIKE ?
+"""
 
-compound_matches = con.execute(query).fetchdf()
+compound_matches = con.execute(query, [compound_input, f"%{compound_input}%", f"%{compound_input}%"]).fetchdf()
 
-# Debugging checks
 if compound_matches.empty:
-    print("No matching compound found.")
-    print("Query executed:", query)  # Debugging output
-    con.close()
-    exit()
-
-print("Columns returned by the query:", compound_matches.columns.tolist())  # Debugging output
-
-# Normalize column names to avoid case sensitivity issues
-compound_matches.columns = compound_matches.columns.str.lower()
-
-if "chembl_id" not in compound_matches.columns:
-    print("Error: 'chembl_id' column not found in query result.")
-    print("Available columns:", compound_matches.columns.tolist())
+    print(f"No matches found for '{compound_input}'.")
     con.close()
     exit()
 
 if len(compound_matches) > 1:
-    print("Multiple compounds found. Please refine your selection:")
-    print(compound_matches.to_string(index=False))
-    ref_chembl_id = input("Enter the exact ChEMBL ID from the list: ").strip()
-    if ref_chembl_id not in compound_matches["chembl_id"].values:
-        print("Invalid selection.")
-        con.close()
-        exit()
-else:
-    ref_chembl_id = compound_matches.iloc[0]["chembl_id"]
-    print(f"Using ChEMBL ID: {ref_chembl_id}")
+    print("\nMultiple matches found:\n")
+    for _, row in compound_matches.iterrows():
+        print(f"ChEMBL ID: {row['ChEMBL_id']} | Trade Name: {row['trade_name']} | Name: {row['molecule_name']}")
+    con.close()
+    exit()
 
+# Unique match found
+ref_chembl_id = compound_matches.iloc[0]['ChEMBL_id']
+trade_name = compound_matches.iloc[0]['trade_name']
+molecule_name = compound_matches.iloc[0]['molecule_name']
+
+print(f"Using ChEMBL ID: {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name})")
 
 # ---------------------- VECTOR RETRIEVAL ----------------------
 query = "SELECT * FROM vector_array"
 df = con.execute(query).fetchdf()
 
-# Debug: Check column names
-print("Available columns in vector_array:", df.columns.tolist())
+# Normalize column names to avoid case sensitivity issues
+df.columns = df.columns.str.lower()
 
 if "chembl_id" not in df.columns:
     print("Error: 'chembl_id' column not found. Please check your database schema.")
@@ -114,21 +101,37 @@ if ref_chembl_id not in vector_data:
 vec_ref = np.array(list(vector_data[ref_chembl_id].values()), dtype=np.float32)
 
 # ---------------------- SIMILARITY CALCULATION ----------------------
-similarities = {}
+similarities = []
 for chembl_id, vector in vector_data.items():
     vec = np.array(list(vector.values()), dtype=np.float32)
     similarity = np.dot(vec_ref, vec) / (np.linalg.norm(vec_ref) * np.linalg.norm(vec))
-    similarities[chembl_id] = similarity
+    
+    # Filter out similarities <= 0
+    if similarity > 0:
+        # Fetch molecule name from substances table
+        name_query = "SELECT COALESCE(name, 'N/A') FROM substances WHERE chembl_id = ?"
+        molecule_name_res = con.execute(name_query, [chembl_id]).fetchone()
+        molecule_name = molecule_name_res[0] if molecule_name_res else "N/A"
 
-# Rank and display results
-ranked_results = sorted(similarities.items(), key=lambda x: x[1], reverse=True)
-df_results = pd.DataFrame(ranked_results, columns=["ChEMBL ID", "Cosine Similarity"])
+        similarities.append((chembl_id, similarity, molecule_name))
+
+# Rank results by similarity in descending order
+ranked_results = sorted(similarities, key=lambda x: x[1], reverse=True)
+df_results = pd.DataFrame(ranked_results, columns=["ChEMBL ID", "Cosine Similarity", "Molecule Name"])
 
 # Display top-k results
-top_k = 10
+top_k = 250
 df_top_k = df_results.head(top_k)
-print(df_top_k)
+
+# Print header
+print(f"\nTop {top_k} Similarity Results for {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name}):\n")
+print(f"{'ChEMBL ID':<15} {'Cosine Similarity':<20} {'Molecule Name'}")
+print("-" * 60)
+
+# Print each row explicitly to ensure all lines are visible
+for index, row in df_top_k.iterrows():
+    print(f"{row['ChEMBL ID']:<15} {row['Cosine Similarity']:<20.6f} {row['Molecule Name']}")
 
 # Close connection
 con.close()
-# ---------------------- END OF SCRIPT ----------------------
+
