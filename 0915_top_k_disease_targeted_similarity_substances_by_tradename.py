@@ -7,7 +7,7 @@ db_path = "bio_data.duck.db"
 con = duckdb.connect(db_path)
 
 # ---------------------- DISEASE SELECTION ----------------------
-user_input = input("Enter the disease name or ID: ").strip()
+user_input = input("Enter the disease ID, name, or description: ").strip()
 
 # Check if input is a disease ID
 if user_input.startswith(("EFO_", "DOID:")) or user_input.isdigit():
