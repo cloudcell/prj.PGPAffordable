@@ -1,28 +1,3 @@
-# read the table molecules from bio_data.duck.db
-# get the id from there and use it in the following query
-
-# "query {
-#   drug(chemblId: "CHEMBL1637") {
-#     name
-#     tradeNames
-#     mechanismsOfAction {
-#       rows {
-#         actionType
-#         mechanismOfAction
-#         references {
-#           source
-#           urls
-#         }
-#         targets {
-#           id
-#           approvedName
-#         }
-#       }
-#     }
-#   }
-# }
-# "
-
 import os
 import json
 import shutil
@@ -31,7 +6,8 @@ from time import sleep
 import duckdb
 import requests
 from tqdm import tqdm
-
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 data_dir = "data_tmp"
 
@@ -51,7 +27,17 @@ print(molecule_ids[:5])
 # GraphQL endpoint (modify if needed)
 GRAPHQL_ENDPOINT = "https://api.platform.opentargets.org/api/v4/graphql"
 
-# Function to send request
+# Set up session with retries
+session = requests.Session()
+retries = Retry(
+    total=5,                 # Maximum retry attempts
+    backoff_factor=2,        # Exponential backoff (2, 4, 8, 16, ...)
+    status_forcelist=[500, 502, 503, 504],  # Retry on server errors
+    allowed_methods=["POST"] # Ensure retries for POST requests
+)
+session.mount("https://", HTTPAdapter(max_retries=retries))
+
+# Function to send request with exponential backoff
 def fetch_drug_data(chembl_id):
     query = f"""
     query {{
@@ -76,13 +62,20 @@ def fetch_drug_data(chembl_id):
     }}
     """
     
-    response = requests.post(GRAPHQL_ENDPOINT, json={"query": query})
+    for attempt in range(5):  # Manual retry loop with backoff
+        try:
+            response = session.post(GRAPHQL_ENDPOINT, json={"query": query})
+            if response.status_code == 200:
+                return response.json()
+            else:
+                print(f"Error fetching data for {chembl_id}: {response.status_code}")
+        except requests.exceptions.RequestException as e:
+            print(f"⚠️ Network error on attempt {attempt + 1} for {chembl_id}: {e}")
+        
+        sleep(2 ** attempt)  # Exponential backoff (1s, 2s, 4s, 8s, ...)
     
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(f"Error fetching data for {chembl_id}: {response.status_code}")
-        return None
+    print(f"❌ Failed to fetch data for {chembl_id} after retries.")
+    return None
 
 output_file_tmp = os.path.join(data_dir, 'mol_target_tmp')
 
