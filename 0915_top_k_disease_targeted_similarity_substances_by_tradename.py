@@ -12,8 +12,8 @@ disease_name = input("Enter the disease name: ")
 
 # Retrieve the disease_id if the name is unique
 query = f"""
-    SELECT disease_id FROM disease_info
-    WHERE disease_name = '{disease_name}'
+    SELECT disease_id FROM diseases
+    WHERE description ILIKE '%' || '{disease_name}'
 """
 disease_ids = con.execute(query).fetchall()
 
