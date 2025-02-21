@@ -45,7 +45,7 @@ target_ids = set(target_ids_df["target_id"].tolist())
 print(f"Found {len(target_ids)} target(s). Proceeding with full compound set.")
 
 # set target_ids to lower case for case-insensitive matching
-target_ids = {target_id.lower() for target_id in target_ids}
+target_ids = {target_id.upper() for target_id in target_ids}
 
 # print the entire list of target IDs without suppression using a loop
 print("Target IDs:")
