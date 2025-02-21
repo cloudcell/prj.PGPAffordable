@@ -105,6 +105,57 @@ def search_targets(query: str):
     results = conn.execute(query_str, [f"%{query}%"]).fetchall()
     return [dict(zip([desc[0] for desc in conn.description], row)) for row in results]
 
+@app.get("/disease_chembl_similarity/{disease_id}/{chembl_id}", response_model=List[Dict])
+def get_disease_chembl_similarity(disease_id: str, chembl_id: str, top_k: int = Query(10, ge=1, le=100)):
+    """Retrieve top-k similar substances for a given disease and ChEMBL ID."""
+    
+    # Get all target IDs associated with the disease
+    target_query = """
+        SELECT DISTINCT target_id FROM tbl_disease_target WHERE disease_id = ?
+    """
+    target_ids = conn.execute(target_query, [disease_id]).fetchall()
+    
+    if not target_ids:
+        raise HTTPException(status_code=404, detail="No targets found for this disease")
+    
+    target_ids = {tid[0] for tid in target_ids}  # Convert to set
+    
+    # Fetch all molecule vectors
+    vector_query = "SELECT * FROM tbl_vector_array"
+    df_vectors = conn.execute(vector_query).fetchdf()
+    df_vectors.columns = df_vectors.columns.str.upper()
+    
+    if "CHEMBL_ID" not in df_vectors.columns:
+        raise HTTPException(status_code=500, detail="Error: 'chembl_id' column not found in database schema.")
+    
+    # Convert vectors into dictionary
+    vector_data = df_vectors.set_index("CHEMBL_ID").to_dict(orient="index")
+    
+    if chembl_id not in vector_data:
+        raise HTTPException(status_code=404, detail="ChEMBL ID not found in dataset")
+    
+    # Create binary mask based on target IDs
+    vector_features = list(vector_data[chembl_id].keys())
+    mask = [1 if feature in target_ids else 0 for feature in vector_features]
+    
+    # Apply mask to the reference vector
+    vec_ref = [vector_data[chembl_id][feat] * mask[i] for i, feat in enumerate(vector_features)]
+    
+    similarities = []
+    for other_chembl_id, vector in vector_data.items():
+        vec = [vector[feat] * mask[i] for i, feat in enumerate(vector_features)]
+        norm_product = sum(v**2 for v in vec_ref) ** 0.5 * sum(v**2 for v in vec) ** 0.5
+        similarity = sum(vr * v for vr, v in zip(vec_ref, vec)) / (norm_product + 1e-9) if norm_product > 0 else 0
+        
+        if similarity > 0:
+            similarities.append({"ChEMBL ID": other_chembl_id, "Cosine Similarity": similarity})
+    
+    # Sort results by similarity
+    ranked_results = sorted(similarities, key=lambda x: x["Cosine Similarity"], reverse=True)[:top_k]
+    
+    return ranked_results
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=7334)
