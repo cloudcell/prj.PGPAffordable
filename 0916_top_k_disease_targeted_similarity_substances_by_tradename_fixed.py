@@ -9,7 +9,6 @@ con = duckdb.connect(db_path)
 # ---------------------- DISEASE SELECTION ----------------------
 user_input = input("Enter the disease ID, name, or description: ").strip()
 
-# Check if input is a disease ID
 if user_input.startswith(("EFO_", "DOID:")) or user_input.isdigit():
     query = "SELECT disease_id, description FROM diseases WHERE disease_id = ?"
     disease_matches = con.execute(query, [user_input]).fetchdf()
@@ -42,7 +41,7 @@ if target_ids_df.empty:
     con.close()
     exit()
 
-target_ids = target_ids_df["target_id"].tolist()
+target_ids = set(target_ids_df["target_id"].tolist())
 print(f"Found {len(target_ids)} target(s). Proceeding with full compound set.")
 
 # ---------------------- COMPOUND SELECTION ----------------------
@@ -102,24 +101,29 @@ if ref_chembl_id not in vector_data:
     exit()
 
 # ---------------------- APPLY TARGET MASK ----------------------
-# Convert target IDs into a binary mask
-mask = np.isin(list(vector_data[ref_chembl_id].keys()), target_ids).astype(np.float32)
+# Identify vector feature names
+vector_features = list(vector_data[ref_chembl_id].keys())
 
-print(f"Masking {np.sum(mask)} out of {len(mask)} target features.")
-# print the mask in full without suppressing any elements
+# Create a binary mask: 1 if the feature (column) matches a target_id, 0 otherwise
+mask = np.array([1 if feature in target_ids else 0 for feature in vector_features], dtype=np.float32)
+
+# print the mask in full without suppression
 np.set_printoptions(threshold=np.inf)
 print(mask)
 
-# Apply element-wise multiplication to the reference vector
+print(f"Applying target mask. {np.sum(mask)} out of {len(mask)} features retained.")
+
+# Apply mask to ALL vectors, including the reference vector
 vec_ref = np.array(list(vector_data[ref_chembl_id].values()), dtype=np.float32) * mask
 
 # ---------------------- SIMILARITY CALCULATION ----------------------
 similarities = []
 for chembl_id, vector in vector_data.items():
-    vec = np.array(list(vector.values()), dtype=np.float32)  * mask  # must be applied to each vector in the dataset for correct normalization
-    similarity = np.dot(vec_ref, vec) / (np.linalg.norm(vec_ref) * np.linalg.norm(vec) + 1e-9)  # Avoid division by zero
+    vec = np.array(list(vector.values()), dtype=np.float32) * mask  # Apply mask to each vector
+    norm_product = np.linalg.norm(vec_ref) * np.linalg.norm(vec)
     
-    # Filter out similarities ≤ 0
+    similarity = np.dot(vec_ref, vec) / (norm_product + 1e-9) if norm_product > 0 else 0  # Avoid division by zero
+    
     if similarity > 0:
         # Fetch molecule name from substances table
         name_query = "SELECT COALESCE(name, 'N/A') FROM substances WHERE chembl_id = ?"
