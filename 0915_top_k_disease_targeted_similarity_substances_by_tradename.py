@@ -45,7 +45,7 @@ target_ids = set(target_ids_df["target_id"].tolist())
 print(f"Found {len(target_ids)} target(s). Proceeding with full compound set.")
 
 # set target_ids to lower case for case-insensitive matching
-target_ids = {target_id.lower() for target_id in target_ids}
+target_ids = {target_id.upper() for target_id in target_ids}
 
 # print the entire list of target IDs without suppression using a loop
 print("Target IDs:")
@@ -93,15 +93,15 @@ query = "SELECT * FROM vector_array"
 df = con.execute(query).fetchdf()
 
 # Normalize column names to avoid case sensitivity issues
-df.columns = df.columns.str.lower()
+df.columns = df.columns.str.upper()
 
-if "chembl_id" not in df.columns:
+if "chembl_id".upper() not in df.columns:
     print("Error: 'chembl_id' column not found. Please check your database schema.")
     con.close()
     exit()
 
 # Extract ChEMBL IDs and vectors
-vector_data = df.set_index("chembl_id").to_dict(orient="index")
+vector_data = df.set_index("chembl_id".upper()).to_dict(orient="index")
 
 if ref_chembl_id not in vector_data:
     print("Reference ChEMBL ID not found in dataset.")
