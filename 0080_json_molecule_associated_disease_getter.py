@@ -14,8 +14,8 @@ data_dir = "data_tmp"
 # Connect to DuckDB
 con = duckdb.connect("bio_data.duck.db")
 
-# Query the molecules table to get IDs
-molecule_ids = con.execute("SELECT id FROM molecules").fetchall()
+# Query the tbl_molecules table to get IDs
+molecule_ids = con.execute("SELECT id FROM tbl_molecules").fetchall()
 con.close()
 
 # Convert to a list of IDs

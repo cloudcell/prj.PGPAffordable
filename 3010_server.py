@@ -13,7 +13,7 @@ conn = duckdb.connect(db_path)
 def get_molecule(chembl_id: str):
     """Retrieve details of a molecule by its ChEMBL ID."""
     query = """
-        SELECT * FROM molecules WHERE id = ?
+        SELECT * FROM tbl_molecules WHERE id = ?
     """
     result = conn.execute(query, [chembl_id]).fetchone()
     if not result:
@@ -25,7 +25,7 @@ def get_molecule(chembl_id: str):
 def get_similarity(chembl_id: str, top_k: int = Query(10, ge=1, le=100)):
     """Retrieve the top-k most similar molecules based on similarity matrix."""
     query = f"""
-        SELECT * FROM similarity_matrix WHERE ChEMBL_id = ?
+        SELECT * FROM tbl_similarity_matrix WHERE ChEMBL_id = ?
     """
     result = conn.execute(query, [chembl_id]).fetchone()
     if not result:
@@ -54,7 +54,7 @@ def get_target(target_id: str):
 def get_disease(disease_id: str):
     """Retrieve details of a disease by its ID."""
     query = """
-        SELECT * FROM diseases WHERE disease_id = ?
+        SELECT * FROM tbl_diseases WHERE disease_id = ?
     """
     result = conn.execute(query, [disease_id]).fetchone()
     if not result:
@@ -66,8 +66,8 @@ def get_disease(disease_id: str):
 def get_disease_targets(disease_id: str):
     """Retrieve all targets associated with a given disease."""
     query = """
-        SELECT t.target_id, t.target_approvedName FROM disease_target dt
-        JOIN targets t ON dt.target_id = t.target_id WHERE dt.disease_id = ?
+        SELECT t.target_id, t.target_approvedName FROM tbl_disease_target dt
+        JOIN tbl_targets t ON dt.target_id = t.target_id WHERE dt.disease_id = ?
     """
     results = conn.execute(query, [disease_id]).fetchall()
     if not results:

@@ -28,18 +28,18 @@ for filename in tqdm(files):
         name = row['disease']['name']
         description = row['disease'].get('description')
 
-        q = 'INSERT OR IGNORE INTO diseases VALUES ($disease_id, $name, $description)'
+        q = 'INSERT OR IGNORE INTO tbl_diseases VALUES ($disease_id, $name, $description)'
         params = {'disease_id': disease_id, 'name': name, 'description': description}
         con.execute(q, params)
 
-        q = 'INSERT OR IGNORE INTO disease_target VALUES ($disease_id, $target_id)'
+        q = 'INSERT OR IGNORE INTO tbl_disease_target VALUES ($disease_id, $target_id)'
         params = {'disease_id': disease_id, 'target_id': target_id}
         con.execute(q, params)
 
 
-con.sql("SELECT * FROM diseases LIMIT 10").show()
-print(f'diseases: {con.execute("SELECT count(*) FROM diseases").fetchone()[0]} rows')
-print(f'disease_target: {con.execute("SELECT count(*) FROM disease_target").fetchone()[0]} rows')
+con.sql("SELECT * FROM tbl_diseases LIMIT 10").show()
+print(f'tbl_diseases: {con.execute("SELECT count(*) FROM tbl_diseases").fetchone()[0]} rows')
+print(f'tbl_disease_target: {con.execute("SELECT count(*) FROM tbl_disease_target").fetchone()[0]} rows')
 
 con.close()
 

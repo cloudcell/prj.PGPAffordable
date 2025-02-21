@@ -11,7 +11,7 @@ con = duckdb.connect(db_path)
 
 top_k_list = []
 
-res = con.sql('SELECT * FROM similarity_matrix WHERE ChEMBL_id = $chembl_id', params={'chembl_id': chembl_id})
+res = con.sql('SELECT * FROM tbl_similarity_matrix WHERE ChEMBL_id = $chembl_id', params={'chembl_id': chembl_id})
 column_names = [column[0] for column in res.description]
 values = res.fetchone()
 

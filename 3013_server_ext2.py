@@ -13,7 +13,7 @@ conn = duckdb.connect(db_path)
 def get_molecule(chembl_id: str):
     """Retrieve details of a molecule by its ChEMBL ID."""
     query = """
-        SELECT * FROM molecules WHERE id = ?
+        SELECT * FROM tbl_molecules WHERE id = ?
     """
     result = conn.execute(query, [chembl_id]).fetchone()
     if not result:
@@ -25,7 +25,7 @@ def get_molecule(chembl_id: str):
 def get_similarity(chembl_id: str, top_k: int = Query(10, ge=1, le=100)):
     """Retrieve the top-k most similar molecules based on similarity matrix."""
     query = f"""
-        SELECT * FROM similarity_matrix WHERE ChEMBL_id = ?
+        SELECT * FROM tbl_similarity_matrix WHERE ChEMBL_id = ?
     """
     result = conn.execute(query, [chembl_id]).fetchone()
     if not result:
@@ -42,7 +42,7 @@ def get_similarity(chembl_id: str, top_k: int = Query(10, ge=1, le=100)):
 def get_target(target_id: str):
     """Retrieve details of a target by its ID."""
     query = """
-        SELECT * FROM targets WHERE target_id = ?
+        SELECT * FROM tbl_targets WHERE target_id = ?
     """
     result = conn.execute(query, [target_id]).fetchone()
     if not result:
@@ -54,7 +54,7 @@ def get_target(target_id: str):
 def get_disease(disease_id: str):
     """Retrieve details of a disease by its ID."""
     query = """
-        SELECT * FROM diseases WHERE disease_id = ?
+        SELECT * FROM tbl_diseases WHERE disease_id = ?
     """
     result = conn.execute(query, [disease_id]).fetchone()
     if not result:
@@ -66,8 +66,8 @@ def get_disease(disease_id: str):
 def get_disease_targets(disease_id: str):
     """Retrieve all targets associated with a given disease."""
     query = """
-        SELECT t.target_id, t.target_approvedName FROM disease_target dt
-        JOIN targets t ON dt.target_id = t.target_id WHERE dt.disease_id = ?
+        SELECT t.target_id, t.target_approvedName FROM tbl_disease_target dt
+        JOIN tbl_targets t ON dt.target_id = t.target_id WHERE dt.disease_id = ?
     """
     results = conn.execute(query, [disease_id]).fetchall()
     if not results:
@@ -79,7 +79,7 @@ def get_disease_targets(disease_id: str):
 def search_molecules(query: str):
     """Search for molecules by partial name or tradename."""
     query_str = """
-        SELECT * FROM molecules 
+        SELECT * FROM tbl_molecules 
         WHERE name ILIKE ? OR ? = ANY(tradeNames)
     """
     results = conn.execute(query_str, [f"%{query}%", query]).fetchall()
@@ -89,7 +89,7 @@ def search_molecules(query: str):
 def search_diseases(query: str):
     """Search for diseases by name or description."""
     query_str = """
-        SELECT * FROM diseases 
+        SELECT * FROM tbl_diseases 
         WHERE name ILIKE ? OR description ILIKE ?
     """
     results = conn.execute(query_str, [f"%{query}%", f"%{query}%"]).fetchall()
@@ -99,7 +99,7 @@ def search_diseases(query: str):
 def search_targets(query: str):
     """Search for targets by name or description."""
     query_str = """
-        SELECT * FROM targets 
+        SELECT * FROM tbl_targets 
         WHERE target_approvedName ILIKE ?
     """
     results = conn.execute(query_str, [f"%{query}%"]).fetchall()

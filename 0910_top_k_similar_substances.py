@@ -12,7 +12,7 @@ top_k_list = []
 self_similarity = None  # Store self-similarity separately
 
 # Fetch data from DuckDB
-res = con.execute("SELECT * FROM similarity_matrix WHERE ChEMBL_id = ?", [chembl_id])
+res = con.execute("SELECT * FROM tbl_similarity_matrix WHERE ChEMBL_id = ?", [chembl_id])
 column_names = [column[0] for column in res.description]
 values = res.fetchone()
 

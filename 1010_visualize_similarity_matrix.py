@@ -14,7 +14,7 @@ db_path = "bio_data.duck.db"
 con = duckdb.connect(db_path)
 
 # Load the similarity matrix from DuckDB
-df = con.execute("SELECT * FROM similarity_matrix").fetchdf()
+df = con.execute("SELECT * FROM tbl_similarity_matrix").fetchdf()
 
 # Extract ChEMBL IDs and convert dataframe to a numpy matrix
 chembl_ids = df["ChEMBL_id"].tolist()

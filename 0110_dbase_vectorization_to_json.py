@@ -10,8 +10,8 @@ con = duckdb.connect(db_path)
 # Fetch all actions and their corresponding action types
 actions_query = """
     SELECT a.ChEMBL_id, a.target_id, at.value
-    FROM actions a
-    JOIN action_types at ON a.actionType = at.actionType
+    FROM tbl_actions a
+    JOIN tbl_action_types at ON a.actionType = at.actionType
 """
 action_data = con.execute(actions_query).fetchall()
 
@@ -38,7 +38,7 @@ for chembl_id, target_vector in tqdm(molecular_vectors.items(), desc="Computing 
 
 # Create a new table for storing molecular vectors
 con.execute("""
-    CREATE TABLE IF NOT EXISTS molecular_vectors (
+    CREATE TABLE IF NOT EXISTS tbl_molecular_vectors (
         ChEMBL_id STRING PRIMARY KEY,
         vector JSON
     )
@@ -47,11 +47,11 @@ con.execute("""
 # Insert vectorized data into the table
 for data in tqdm(vectorized_data, desc="Inserting vectorized data"):
     con.execute("""
-        INSERT OR REPLACE INTO molecular_vectors (ChEMBL_id, vector) VALUES (?, ?)
+        INSERT OR REPLACE INTO tbl_molecular_vectors (ChEMBL_id, vector) VALUES (?, ?)
     """, data)
 
 # Verify insertion
-con.sql("SELECT * FROM molecular_vectors LIMIT 10").show()
+con.sql("SELECT * FROM tbl_molecular_vectors LIMIT 10").show()
 
 # Close connection
 con.close()

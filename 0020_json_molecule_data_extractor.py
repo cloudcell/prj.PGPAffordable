@@ -102,13 +102,13 @@ with open(TEMP_TSV_PATH, 'w', encoding='utf-8') as f:
 
 # Copy data into DuckDB with strict mode disabled
 con.execute(f"""
-    COPY molecules FROM '{TEMP_TSV_PATH}'
+    COPY tbl_molecules FROM '{TEMP_TSV_PATH}'
     (FORMAT CSV, HEADER TRUE, DELIMITER '\t', QUOTE '', ESCAPE '', NULL '{NULL}', AUTO_DETECT FALSE)
 """)
 
 # Verify data import
-con.sql("SELECT * FROM molecules LIMIT 20").show()
-print(f'Total: {con.execute("SELECT count(*) FROM molecules").fetchone()[0]} rows')
+con.sql("SELECT * FROM tbl_molecules LIMIT 20").show()
+print(f'Total: {con.execute("SELECT count(*) FROM tbl_molecules").fetchone()[0]} rows')
 
 # Cleanup
 con.close()

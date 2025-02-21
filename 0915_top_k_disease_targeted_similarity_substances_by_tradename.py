@@ -10,10 +10,10 @@ con = duckdb.connect(db_path)
 user_input = input("Enter the disease ID, name, or description: ").strip()
 
 if user_input.startswith(("EFO_", "DOID:")) or user_input.isdigit():
-    query = "SELECT disease_id, description FROM diseases WHERE disease_id = ?"
+    query = "SELECT disease_id, description FROM tbl_diseases WHERE disease_id = ?"
     disease_matches = con.execute(query, [user_input]).fetchdf()
 else:
-    query = "SELECT disease_id, name, description FROM diseases WHERE name ILIKE ? OR description ILIKE ?"
+    query = "SELECT disease_id, name, description FROM tbl_diseases WHERE name ILIKE ? OR description ILIKE ?"
     disease_matches = con.execute(query, [f"%{user_input}%", f"%{user_input}%"]).fetchdf()
 
 if disease_matches.empty:
@@ -33,7 +33,7 @@ else:
     print(f"Using disease ID: {disease_id}")
 
 # ---------------------- TARGET SELECTION ----------------------
-query = "SELECT DISTINCT target_id FROM disease_target WHERE disease_id = ?"
+query = "SELECT DISTINCT target_id FROM tbl_disease_target WHERE disease_id = ?"
 target_ids_df = con.execute(query, [disease_id]).fetchdf()
 
 if target_ids_df.empty:
@@ -59,7 +59,7 @@ query = """
     SELECT DISTINCT chembl_id AS ChEMBL_id, 
            COALESCE(name, 'N/A') AS molecule_name, 
            COALESCE(tradeNames::STRING, 'N/A') AS trade_name
-    FROM substances
+    FROM tbl_substances
     WHERE chembl_id = ?
        OR name ILIKE ?
        OR tradeNames::STRING ILIKE ?
@@ -89,7 +89,7 @@ molecule_name = compound_matches.loc[compound_matches["ChEMBL_id"] == ref_chembl
 print(f"Using ChEMBL ID: {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name})")
 
 # ---------------------- VECTOR RETRIEVAL ----------------------
-query = "SELECT * FROM vector_array"
+query = "SELECT * FROM tbl_vector_array"
 df = con.execute(query).fetchdf()
 
 # Normalize column names to avoid case sensitivity issues
@@ -133,8 +133,8 @@ for chembl_id, vector in vector_data.items():
     similarity = np.dot(vec_ref, vec) / (norm_product + 1e-9) if norm_product > 0 else 0  # Avoid division by zero
     
     if similarity > 0:
-        # Fetch molecule name from substances table
-        name_query = "SELECT COALESCE(name, 'N/A') FROM substances WHERE chembl_id = ?"
+        # Fetch molecule name from tbl_substances table
+        name_query = "SELECT COALESCE(name, 'N/A') FROM tbl_substances WHERE chembl_id = ?"
         molecule_name_res = con.execute(name_query, [chembl_id]).fetchone()
         molecule_name = molecule_name_res[0] if molecule_name_res else "N/A"
 

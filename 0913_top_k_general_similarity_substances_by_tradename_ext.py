@@ -15,8 +15,8 @@ query = """
     SELECT DISTINCT m.id AS ChEMBL_id, 
            COALESCE(t.trade_name, 'N/A') AS trade_name, 
            COALESCE(m.name, 'N/A') AS molecule_name
-    FROM molecules m
-    LEFT JOIN (SELECT id, unnest(tradeNames) AS trade_name FROM molecules) t
+    FROM tbl_molecules m
+    LEFT JOIN (SELECT id, unnest(tradeNames) AS trade_name FROM tbl_molecules) t
     ON m.id = t.id
     WHERE t.trade_name ILIKE ? OR m.name ILIKE ?
 """
@@ -44,7 +44,7 @@ top_k_list = []
 self_similarity = None  # Store self-similarity separately
 
 # Fetch similarity data
-res = con.execute("SELECT * FROM similarity_matrix WHERE ChEMBL_id = ?", [chembl_id])
+res = con.execute("SELECT * FROM tbl_similarity_matrix WHERE ChEMBL_id = ?", [chembl_id])
 column_names = [column[0] for column in res.description]
 values = res.fetchone()
 
@@ -64,8 +64,8 @@ if values is not None:
             trade_name_res = con.execute(
                 """SELECT DISTINCT COALESCE(t.trade_name, 'N/A') AS trade_name, 
                           COALESCE(m.name, 'N/A') AS molecule_name 
-                   FROM molecules m 
-                   LEFT JOIN (SELECT id, unnest(tradeNames) AS trade_name FROM molecules) t 
+                   FROM tbl_molecules m 
+                   LEFT JOIN (SELECT id, unnest(tradeNames) AS trade_name FROM tbl_molecules) t 
                    ON m.id = t.id
                    WHERE m.id = ?""", [column_name]
             ).fetchone()

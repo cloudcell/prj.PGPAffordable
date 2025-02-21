@@ -40,14 +40,14 @@ ACTION_TYPES = {
 db_path = "bio_data.duck.db"
 con = duckdb.connect(db_path)
 
-action_type_list = [row[0] for row in con.execute('SELECT DISTINCT actionType FROM actions').fetchall()]
+action_type_list = [row[0] for row in con.execute('SELECT DISTINCT actionType FROM tbl_actions').fetchall()]
 
 for actionType in sorted(action_type_list):
     print(actionType)
     v = ACTION_TYPES.get(actionType)
     params = {'actionType': actionType, 'value': v}
-    con.execute('INSERT OR REPLACE INTO action_types VALUES ($actionType, $value);', params)
+    con.execute('INSERT OR REPLACE INTO tbl_action_types VALUES ($actionType, $value);', params)
 
-con.sql('SELECT * FROM action_types').show()
+con.sql('SELECT * FROM tbl_action_types').show()
 
 con.close()

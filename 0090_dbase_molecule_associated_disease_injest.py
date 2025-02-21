@@ -28,16 +28,16 @@ for filename in tqdm(files):
         name = row['name']
         description = row.get('description')
 
-        q = 'INSERT OR IGNORE INTO diseases VALUES ($disease_id, $name, $description)'
+        q = 'INSERT OR IGNORE INTO tbl_diseases VALUES ($disease_id, $name, $description)'
         params = {'disease_id': disease_id, 'name': name, 'description': description}
         con.execute(q, params)
 
-        q = 'INSERT OR IGNORE INTO disease_substance VALUES ($disease_id, $chembl_id)'
+        q = 'INSERT OR IGNORE INTO tbl_disease_substance VALUES ($disease_id, $chembl_id)'
         params = {'disease_id': disease_id, 'chembl_id': chembl_id}
         con.execute(q, params)
 
-print(f'diseases: {con.execute("SELECT count(*) FROM diseases").fetchone()[0]} rows')
-print(f'disease_substance: {con.execute("SELECT count(*) FROM disease_substance").fetchone()[0]} rows')
+print(f'tbl_diseases: {con.execute("SELECT count(*) FROM tbl_diseases").fetchone()[0]} rows')
+print(f'tbl_disease_substance: {con.execute("SELECT count(*) FROM tbl_disease_substance").fetchone()[0]} rows')
 
 con.close()
 

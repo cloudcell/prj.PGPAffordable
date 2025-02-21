@@ -24,13 +24,13 @@ for filename in tqdm(files):
     drug = data.get("data", {}).get("drug", {})
     chembl_id = filename.replace("mol_target_", "").replace(".json", "")
 
-    # Insert into substances table
+    # Insert into tbl_substances table
     name = drug.get("name")
     tradeNames = drug.get("tradeNames", [])
 
     q = '''
-    INSERT OR IGNORE INTO substances
-    SELECT * FROM molecules
+    INSERT OR IGNORE INTO tbl_substances
+    SELECT * FROM tbl_molecules
     WHERE id = $chembl_id
     '''
     params = {'chembl_id': chembl_id}
@@ -46,15 +46,15 @@ for filename in tqdm(files):
             target_id = target.get("id")
             target_name = target.get("approvedName")
 
-            # Insert into targets table
-            q = 'INSERT OR IGNORE INTO targets VALUES ($target_id, $target_name)'
+            # Insert into tbl_targets table
+            q = 'INSERT OR IGNORE INTO tbl_targets VALUES ($target_id, $target_name)'
             params = {'target_id': target_id, 'target_name': target_name}
             con.execute(q, params)
 
             action_id = f"{chembl_id}_{target_id}"
 
-            # Insert into actions table
-            q = 'INSERT OR IGNORE INTO actions VALUES ($action_id, $chembl_id, $target_id, $actionType, $mechanismOfAction)'
+            # Insert into tbl_actions table
+            q = 'INSERT OR IGNORE INTO tbl_actions VALUES ($action_id, $chembl_id, $target_id, $actionType, $mechanismOfAction)'
             params = {
                 'action_id': action_id,
                 'chembl_id': chembl_id,
@@ -70,18 +70,18 @@ for filename in tqdm(files):
                 ref_data = reference.get("urls", [])
 
                 # Insert into references table
-                q = 'INSERT OR IGNORE INTO refs VALUES ($action_id, $ref_source, $ref_data)'
+                q = 'INSERT OR IGNORE INTO tbl_refs VALUES ($action_id, $ref_source, $ref_data)'
                 params = {'action_id': action_id, 'ref_source': ref_source, 'ref_data': ref_data}
                 con.execute(q, params)
 
 # Verify data import
-con.sql("SELECT * FROM actions LIMIT 20").show()
-print(f'actions: {con.execute("SELECT count(*) FROM actions").fetchone()[0]} rows')
-print(f'refs: {con.execute("SELECT count(*) FROM refs").fetchone()[0]} rows')
-print(f'targets: {con.execute("SELECT count(*) FROM targets").fetchone()[0]} rows')
-print(f'substances: {con.execute("SELECT count(*) FROM substances").fetchone()[0]} rows')
-print(f'substances.name is NULL: {con.execute("SELECT count(*) FROM substances WHERE name is NULL").fetchone()[0]} rows')
-print(f'actions.actionType is NULL: {con.execute("SELECT count(*) FROM actions WHERE actionType is NULL").fetchone()[0]} rows')
+con.sql("SELECT * FROM tbl_actions LIMIT 20").show()
+print(f'tbl_actions: {con.execute("SELECT count(*) FROM tbl_actions").fetchone()[0]} rows')
+print(f'tbl_refs: {con.execute("SELECT count(*) FROM tbl_refs").fetchone()[0]} rows')
+print(f'tbl_targets: {con.execute("SELECT count(*) FROM tbl_targets").fetchone()[0]} rows')
+print(f'tbl_substances: {con.execute("SELECT count(*) FROM tbl_substances").fetchone()[0]} rows')
+print(f'tbl_substances.name is NULL: {con.execute("SELECT count(*) FROM tbl_substances WHERE name is NULL").fetchone()[0]} rows')
+print(f'tbl_actions.actionType is NULL: {con.execute("SELECT count(*) FROM tbl_actions WHERE actionType is NULL").fetchone()[0]} rows')
 
 con.close()
 
