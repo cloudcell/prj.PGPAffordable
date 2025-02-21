@@ -5,6 +5,8 @@ import pandas as pd
 
 JSON_CHARS_TO_DISPLAY = 100
 
+TOP_K = 10
+
 # Connect to DuckDB database
 db_path = "bio_data.duck.db"
 con = duckdb.connect(db_path)
@@ -147,9 +149,15 @@ for chembl_id, vector in vector_data.items():
 ranked_results = sorted(similarities, key=lambda x: x[1], reverse=True)
 df_results = pd.DataFrame(ranked_results, columns=["ChEMBL ID", "Cosine Similarity", "Molecule Name"])
 
-# Display top-k results
-top_k = 250
-df_top_k = df_results.head(top_k)
+# Display top-k results based on the top 10-th cosine similarity
+ref_similarity = df_results.iloc[TOP_K - 1]["Cosine Similarity"]
+print(f"\nTop {TOP_K} similarity threshold: {ref_similarity:.6f}")
+
+# filter the results based on the top-k threshold
+df_top_k = df_results[df_results["Cosine Similarity"] >= ref_similarity]
+
+# top_k = 250
+# df_top_k = df_results.head(top_k)
 
 known_drugs_aggregated = []
 for index, row in df_top_k.iterrows():
@@ -161,7 +169,7 @@ for index, row in df_top_k.iterrows():
 df_top_k['fld_knownDrugsAggregated'] = pd.Series(known_drugs_aggregated)  # Add fld_knownDrugsAggregated column
 
 # Print header
-print(f"\nTop {top_k} Similarity Results for {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name}):\n")
+print(f"\nTop {TOP_K} Similarity Results for {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name}):\n")
 print(f"{'ChEMBL ID':<15} {'Cosine Similarity':<20} {'Molecule Name':<30} {'fld_knownDrugsAggregated'}")
 print("-" * 100)
 
