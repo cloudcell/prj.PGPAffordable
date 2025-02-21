@@ -1,4 +1,3 @@
-import json
 import duckdb
 import numpy as np
 import pandas as pd
@@ -149,23 +148,14 @@ df_results = pd.DataFrame(ranked_results, columns=["ChEMBL ID", "Cosine Similari
 top_k = 250
 df_top_k = df_results.head(top_k)
 
-known_drugs_aggregated = []
-for index, row in df_top_k.iterrows():
-    chembl_id = row['ChEMBL ID']
-    query = "SELECT * FROM knownDrugsAggregated WHERE drugId = ? and diseaseId = ?"
-    known_drugs = json.dumps([{column[0]: value for column, value in zip(con.description, row)} for row in con.execute(query, [chembl_id, disease_id]).fetchall()])
-    known_drugs_aggregated.append(known_drugs)
-
-df_top_k['knownDrugsAggregated'] = pd.Series(known_drugs_aggregated, index=df_top_k.index)
-
 # Print header
 print(f"\nTop {top_k} Similarity Results for {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name}):\n")
-print(f"{'ChEMBL ID':<15} {'Cosine Similarity':<20} {'Molecule Name':<30} {'knownDrugsAggregated'}")
-print("-" * 100)
+print(f"{'ChEMBL ID':<15} {'Cosine Similarity':<20} {'Molecule Name'}")
+print("-" * 60)
 
 # Print each row explicitly to ensure all lines are visible
 for index, row in df_top_k.iterrows():
-    print(f"{row['ChEMBL ID']:<15} {row['Cosine Similarity']:<20.6f} {row['Molecule Name']:<30} {row['knownDrugsAggregated'][:100]}")
+    print(f"{row['ChEMBL ID']:<15} {row['Cosine Similarity']:<20.6f} {row['Molecule Name']}")
 
 # Close connection
 con.close()
