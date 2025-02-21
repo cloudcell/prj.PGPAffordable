@@ -105,13 +105,18 @@ if ref_chembl_id not in vector_data:
 # Convert target IDs into a binary mask
 mask = np.isin(list(vector_data[ref_chembl_id].keys()), target_ids).astype(np.float32)
 
+print(f"Masking {np.sum(mask)} out of {len(mask)} target features.")
+# print the mask in full without suppressing any elements
+np.set_printoptions(threshold=np.inf)
+print(mask)
+
 # Apply element-wise multiplication to the reference vector
 vec_ref = np.array(list(vector_data[ref_chembl_id].values()), dtype=np.float32) * mask
 
 # ---------------------- SIMILARITY CALCULATION ----------------------
 similarities = []
 for chembl_id, vector in vector_data.items():
-    vec = np.array(list(vector.values()), dtype=np.float32)  # No need to apply target mask to other vectors because the mask is already applied to the reference vector
+    vec = np.array(list(vector.values()), dtype=np.float32)  * mask  # must be applied to each vector in the dataset for correct normalization
     similarity = np.dot(vec_ref, vec) / (np.linalg.norm(vec_ref) * np.linalg.norm(vec) + 1e-9)  # Avoid division by zero
     
     # Filter out similarities ≤ 0
