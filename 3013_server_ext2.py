@@ -152,7 +152,13 @@ def get_disease_chembl_similarity(disease_id: str, chembl_id: str, top_k: int = 
     
     # Sort results by similarity
     ranked_results = sorted(similarities, key=lambda x: x["Cosine Similarity"], reverse=True)[:top_k]
-    
+
+    query = "SELECT * FROM tbl_knownDrugsAggregated WHERE drugId = ? and diseaseId = ?"
+    for i, row in enumerate(ranked_results):
+        chembl_id = row['ChEMBL ID']
+        known_drugs = [{column[0]: value for column, value in zip(conn.description, row)} for row in conn.execute(query, [chembl_id, disease_id]).fetchall()]
+        ranked_results[i]['fld_knownDrugsAggregated'] = known_drugs
+
     return ranked_results
 
 
