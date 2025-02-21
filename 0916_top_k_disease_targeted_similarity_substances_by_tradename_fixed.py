@@ -111,7 +111,7 @@ vec_ref = np.array(list(vector_data[ref_chembl_id].values()), dtype=np.float32) 
 # ---------------------- SIMILARITY CALCULATION ----------------------
 similarities = []
 for chembl_id, vector in vector_data.items():
-    vec = np.array(list(vector.values()), dtype=np.float32) * mask  # Apply mask to each vector
+    vec = np.array(list(vector.values()), dtype=np.float32)  # No need to apply target mask to other vectors because the mask is already applied to the reference vector
     similarity = np.dot(vec_ref, vec) / (np.linalg.norm(vec_ref) * np.linalg.norm(vec) + 1e-9)  # Avoid division by zero
     
     # Filter out similarities ≤ 0
