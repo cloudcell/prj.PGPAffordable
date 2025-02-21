@@ -3,6 +3,8 @@ import duckdb
 import numpy as np
 import pandas as pd
 
+JSON_CHARS_TO_DISPLAY = 100
+
 # Connect to DuckDB database
 db_path = "bio_data.duck.db"
 con = duckdb.connect(db_path)
@@ -156,16 +158,16 @@ for index, row in df_top_k.iterrows():
     known_drugs = json.dumps([{column[0]: value for column, value in zip(con.description, row)} for row in con.execute(query, [chembl_id, disease_id]).fetchall()])
     known_drugs_aggregated.append(known_drugs)
 
-df_top_k['knownDrugsAggregated'] = pd.Series(known_drugs_aggregated, index=df_top_k.index)
+df_top_k['fld_knownDrugsAggregated'] = pd.Series(known_drugs_aggregated)  # Add fld_knownDrugsAggregated column
 
 # Print header
 print(f"\nTop {top_k} Similarity Results for {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name}):\n")
-print(f"{'ChEMBL ID':<15} {'Cosine Similarity':<20} {'Molecule Name':<30} {'knownDrugsAggregated'}")
+print(f"{'ChEMBL ID':<15} {'Cosine Similarity':<20} {'Molecule Name':<30} {'fld_knownDrugsAggregated'}")
 print("-" * 100)
 
-# Print each row explicitly to ensure all lines are visible
+# Print each row explicitly to ensure all lines are visible without sorting
 for index, row in df_top_k.iterrows():
-    print(f"{row['ChEMBL ID']:<15} {row['Cosine Similarity']:<20.6f} {row['Molecule Name']:<30} {row['knownDrugsAggregated'][:100]}")
+    print(f"{row['ChEMBL ID']:<15} {row['Cosine Similarity']:<20.6f} {row['Molecule Name']:<30} {row['fld_knownDrugsAggregated'][:JSON_CHARS_TO_DISPLAY]}")
 
 # Close connection
 con.close()
