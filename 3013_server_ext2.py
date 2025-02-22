@@ -1,3 +1,4 @@
+import json
 from fastapi import FastAPI, Query, HTTPException
 import duckdb
 from typing import List, Dict
@@ -156,7 +157,8 @@ def get_disease_chembl_similarity(disease_id: str, chembl_id: str, top_k: int = 
     query = "SELECT * FROM tbl_knownDrugsAggregated WHERE drugId = ? and diseaseId = ?"
     for i, row in enumerate(ranked_results):
         chembl_id = row['ChEMBL ID']
-        known_drugs = [{column[0]: value for column, value in zip(conn.description, row)} for row in conn.execute(query, [chembl_id, disease_id]).fetchall()]
+        known_drugs = [{column[0]: json.loads(value) if column[0] == 'urls' else value for column, value in zip(conn.description, row)} 
+                       for row in conn.execute(query, [chembl_id, disease_id]).fetchall()]
         ranked_results[i]['fld_knownDrugsAggregated'] = known_drugs
 
     return ranked_results
