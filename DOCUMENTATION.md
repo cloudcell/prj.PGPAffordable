@@ -1,5 +1,6 @@
-| Phase | Status                     | hasBeenWithdrawn | isApproved | urls | Score | 
-|-------|-----------------------------|-------|------------------|----------|--|
+| Phase | Status                     | hasBeenWithdrawn | isApproved | urls | Score |
+|-------|----------------------------|------------------|------------|------|-------|
+| kda   | kda                        | mol              |  mol          |  kda    | manual  | 
 | 0.50  | Active, not recruiting      |       |                  |          |  |
 | 0.50  | Completed                   |       |                  |          |  |
 | 0.50  | Enrolling by invitation     |       |                  |          |  |
