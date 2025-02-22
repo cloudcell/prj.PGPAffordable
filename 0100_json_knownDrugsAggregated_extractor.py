@@ -41,6 +41,7 @@ for filename in os.listdir(DATA_DIR):
             # Read NDJSON (Newline Delimited JSON)
             with open(file_path, "r", encoding="utf-8") as f:
                 for line in f:
+                    line = line.replace('\t', ' ')
                     record = json.loads(line)
                     # {
                     #     "drugId": str,
@@ -67,23 +68,23 @@ for filename in os.listdir(DATA_DIR):
 
                     # Extract relevant fields
                     data_list.append([
-                        record["drugId"].replace('\t', ' ').strip(),
-                        record["targetId"].replace('\t', ' ').strip(),
-                        record["diseaseId"].replace('\t', ' ').strip(),
+                        record["drugId"],
+                        record["targetId"],
+                        record["diseaseId"],
                         record.get("phase", NULL),
-                        record.get("status", NULL).replace('\t', ' ').strip(),
-                        json.dumps([{k.replace('\t', ' ').strip(): v.replace('\t', ' ').strip() for k, v in a.items()} for a in record.get("urls", [])]),
-                        json.dumps([a.replace('\t', ' ').strip() for a in record.get("ancestors", [])]),
-                        record.get("label", NULL).replace('\t', ' ').strip(),
-                        record.get("approvedSymbol", NULL).replace('\t', ' ').strip(),
-                        record.get("approvedName", NULL).replace('\t', ' ').strip(),
-                        json.dumps([a.replace('\t', ' ').strip() for a in record.get("targetClass", [])]),
-                        record.get("prefName", NULL).replace('\t', ' ').strip(),
-                        json.dumps([a.replace('\t', ' ').strip() for a in record.get("tradeNames", [])]),
-                        json.dumps([a.replace('\t', ' ').strip() for a in record.get("synonyms", [])]),
-                        record.get("drugType", NULL).replace('\t', ' ').strip(),
-                        record.get("mechanismOfAction", NULL).replace('\t', ' ').strip(),
-                        record.get("targetName", NULL).replace('\t', ' ').strip(),
+                        record.get("status", NULL),
+                        json.dumps(record.get("urls", [])),
+                        json.dumps(record.get("ancestors", [])),
+                        record.get("label", NULL),
+                        record.get("approvedSymbol", NULL),
+                        record.get("approvedName", NULL),
+                        json.dumps(record.get("targetClass", [])),
+                        record.get("prefName", NULL),
+                        json.dumps(record.get("tradeNames", [])),
+                        json.dumps(record.get("synonyms", [])),
+                        record.get("drugType", NULL),
+                        record.get("mechanismOfAction", NULL),
+                        record.get("targetName", NULL),
                     ])
 
         except Exception as e:

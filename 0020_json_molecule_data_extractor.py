@@ -41,6 +41,7 @@ for filename in os.listdir(DATA_DIR):
             # Read NDJSON (Newline Delimited JSON)
             with open(file_path, "r", encoding="utf-8") as f:
                 for line in f:
+                    line = line.replace('\t', ' ')
                     record = json.loads(line)
                     # {
                     #     "id": str,
@@ -74,23 +75,23 @@ for filename in os.listdir(DATA_DIR):
 
                     # Extract relevant fields
                     data_list.append([
-                        record["id"].replace('\t', ' ').strip(),
-                        record.get("canonicalSmiles", NULL).replace('\t', ' ').strip(),
-                        record.get("inchiKey", NULL).replace('\t', ' ').strip(),
-                        record.get("drugType", NULL).replace('\t', ' ').strip(),
+                        record["id"],
+                        record.get("canonicalSmiles", NULL),
+                        record.get("inchiKey", NULL),
+                        record.get("drugType", NULL),
                         record.get("blackBoxWarning", NULL),
-                        record.get("name", NULL).replace('\t', ' ').strip(),
+                        record.get("name", NULL),
                         record.get("yearOfFirstApproval", NULL),
                         record.get("maximumClinicalTrialPhase", NULL),
                         record.get("hasBeenWithdrawn", NULL),
                         record.get("isApproved", NULL),
-                        json.dumps([a.replace('\t', ' ').strip() for a in record.get("tradeNames", [])]),  # Store as JSON string
-                        json.dumps([a.replace('\t', ' ').strip() for a in record.get("synonyms", [])]),  # Store as JSON string
-                        json.dumps({k.replace('\t', ' ').strip(): [a.replace('\t', ' ').strip() for a in v] for k, v in record.get("crossReferences", {}).items()}),  # Store as JSON string
-                        json.dumps([a.replace('\t', ' ').strip() for a in record.get("childChemblIds", [])]),  # Store as JSON string
-                        json.dumps([a.replace('\t', ' ').strip() for a in record.get("linkedDiseases", {}).get("rows", [])]),  # Store as JSON string
-                        json.dumps([a.replace('\t', ' ').strip() for a in record.get("linkedTargets", {}).get("rows", [])]),  # Store as JSON string
-                        record.get("description", NULL).replace('\t', ' ').strip(),
+                        json.dumps(record.get("tradeNames", [])),  # Store as JSON string
+                        json.dumps(record.get("synonyms", [])),  # Store as JSON string
+                        json.dumps(record.get("crossReferences", {})),  # Store as JSON string
+                        json.dumps(record.get("childChemblIds", [])),  # Store as JSON string
+                        json.dumps(record.get("linkedDiseases", {}).get("rows", [])),  # Store as JSON string
+                        json.dumps(record.get("linkedTargets", {}).get("rows", [])),  # Store as JSON string
+                        record.get("description", NULL),
                     ])
 
         except Exception as e:
