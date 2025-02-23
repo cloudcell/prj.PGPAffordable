@@ -3,6 +3,21 @@ from fastapi import FastAPI, Query, HTTPException
 import duckdb
 from typing import List, Dict
 
+
+
+STATUS_NUM = {
+    'Active, not recruiting': 4,
+    'Completed': 5,
+    'Enrolling by invitation': 3,
+    'Not yet recruiting': 1,
+    'Recruiting': 2,
+    'Suspended': 0,
+    'Terminated': 0,
+    'Unknown status': 0,
+    'Withdrawn': 0,
+    'N/A': 0,
+}
+
 # Initialize FastAPI app
 app = FastAPI(title="Affordable API", description="API for querying molecular similarity and target data", version="1.0")
 
@@ -156,12 +171,52 @@ def get_disease_chembl_similarity(disease_id: str, chembl_id: str, top_k: int = 
 
     query = "SELECT * FROM tbl_knownDrugsAggregated WHERE drugId = ? and diseaseId = ?"
     for i, row in enumerate(ranked_results):
-        chembl_id = row['ChEMBL ID']
+        chembl_id1 = row['ChEMBL ID']
         known_drugs = [{column[0]: json.loads(value) if column[0] == 'urls' else value for column, value in zip(conn.description, row)} 
-                       for row in conn.execute(query, [chembl_id, disease_id]).fetchall()]
+                       for row in conn.execute(query, [chembl_id1, disease_id]).fetchall()]
         ranked_results[i]['fld_knownDrugsAggregated'] = known_drugs
 
-    return ranked_results
+    for i, row in enumerate(ranked_results):
+        chembl_id1 = row['ChEMBL ID']
+        query = "SELECT COALESCE(name, 'N/A'), isApproved FROM tbl_substances WHERE chembl_id = ?"
+        molecule_name, is_approved = conn.execute(query, [chembl_id1]).fetchone()
+
+        query = "SELECT * FROM tbl_knownDrugsAggregated WHERE drugId = ? and diseaseId = ?"
+        known_drugs_aggregated = [{column[0]: value for column, value in zip(conn.description, row)} for row in conn.execute(query, [chembl_id1, disease_id]).fetchall()]
+        if known_drugs_aggregated:
+            is_url_available = any(row['urls'] for row in known_drugs_aggregated)
+            max_phase = max(row['phase'] for row in known_drugs_aggregated)
+            max_status_for_max_phase = max((row['status'] for row in known_drugs_aggregated if row['phase'] == max_phase), key=lambda x: STATUS_NUM.get(x, 0))
+            if max_status_for_max_phase is None:
+                max_status_for_max_phase = 'N/A'
+            status_num = STATUS_NUM[max_status_for_max_phase]
+        else:
+            known_drugs_aggregated = []
+            is_url_available = False
+            max_phase = 0
+            max_status_for_max_phase = 'N/A'
+            status_num = 0
+
+        ranked_results[i]['Molecule Name'] = molecule_name
+        ranked_results[i]['isUrlAvailable'] = is_url_available
+        ranked_results[i]['isApproved'] = is_approved
+        ranked_results[i]['phase'] = max_phase
+        ranked_results[i]['status'] = max_status_for_max_phase
+        ranked_results[i]['status_num'] = status_num
+        ranked_results[i]['fld_knownDrugsAggregated'] = known_drugs_aggregated
+
+    ranked_results = [row for row in ranked_results if row['isUrlAvailable'] or row['ChEMBL ID'] == chembl_id]
+
+    ranked_results.sort(key=lambda x: [x['ChEMBL ID'] == chembl_id, x['Cosine Similarity'], x['isApproved'], x['phase'], x['status_num']], reverse=True)
+
+    # Display top-k results based on the top 10-th cosine similarity
+    if len(ranked_results) > top_k - 1:
+        ref_similarity = ranked_results[top_k - 1]["Cosine Similarity"]
+        results_top_k = [row for row in ranked_results if row['Cosine Similarity'] >= ref_similarity]
+    else:
+        results_top_k = ranked_results
+
+    return results_top_k
 
 
 if __name__ == "__main__":
