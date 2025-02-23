@@ -4,7 +4,7 @@ import sys
 
 # Define the prefix start and end
 PREFIX_SCRIPT_START = "0010"
-PREFIX_SCRIPT_END = "0130"
+PREFIX_SCRIPT_END = "0800"  # "0130"
 
 # Path to the virtual environment's Python
 VENV_PYTHON = sys.executable  # This ensures the current Python interpreter is used
