@@ -215,7 +215,7 @@ if len(results) > TOP_K - 1:
     print(f"\nTop {TOP_K} similarity threshold: {ref_similarity:.6f}")
 
     # filter the results based on the top-k threshold
-    results_top_k = [row['Cosine Similarity'] for row in results]
+    results_top_k = [row for row in results if row['Cosine Similarity'] >= ref_similarity]
 else:
     results_top_k = results
 
