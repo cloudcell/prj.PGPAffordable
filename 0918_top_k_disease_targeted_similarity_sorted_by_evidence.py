@@ -7,6 +7,19 @@ JSON_CHARS_TO_DISPLAY = 100
 
 TOP_K = 30
 
+STATUS_NUM = {
+    'Active, not recruiting': 4,
+    'Completed': 5,
+    'Enrolling by invitation': 3,
+    'Not yet recruiting': 1,
+    'Recruiting': 2,
+    'Suspended': 0,
+    'Terminated': 0,
+    'Unknown status': 0,
+    'Withdrawn': 0,
+    'N/A': 0,
+}
+
 # Connect to DuckDB database
 db_path = "bio_data.duck.db"
 con = duckdb.connect(db_path)
@@ -138,44 +151,82 @@ for chembl_id, vector in vector_data.items():
     similarity = np.dot(vec_ref, vec) / (norm_product + 1e-9) if norm_product > 0 else 0  # Avoid division by zero
     
     if similarity > 0:
-        # Fetch molecule name from tbl_substances table
-        name_query = "SELECT COALESCE(name, 'N/A') FROM tbl_substances WHERE chembl_id = ?"
-        molecule_name_res = con.execute(name_query, [chembl_id]).fetchone()
-        molecule_name = molecule_name_res[0] if molecule_name_res else "N/A"
-
-        similarities.append((chembl_id, similarity, molecule_name))
+        similarities.append((chembl_id, similarity))
 
 # Rank results by similarity in descending order
 ranked_results = sorted(similarities, key=lambda x: x[1], reverse=True)
-df_results = pd.DataFrame(ranked_results, columns=["ChEMBL ID", "Cosine Similarity", "Molecule Name"])
+df_results = pd.DataFrame(ranked_results, columns=["ChEMBL ID", "Cosine Similarity"])
 
-known_drugs_aggregated = []
+molecule_name_column = []
+is_url_available_column = []
+is_approved_column = []
+phase_column = []
+status_column = []
+status_num_column = []
+known_drugs_aggregated_column = []
 for index, row in df_results.iterrows():
     chembl_id = row['ChEMBL ID']
+    query = "SELECT COALESCE(name, 'N/A'), isApproved FROM tbl_substances WHERE chembl_id = ?"
+    molecule_name, is_approved = con.execute(query, [chembl_id]).fetchone()
+    molecule_name_column.append(molecule_name)
+    is_approved_column.append(is_approved)
+
     query = "SELECT * FROM tbl_knownDrugsAggregated WHERE drugId = ? and diseaseId = ?"
-    known_drugs = json.dumps([{column[0]: value for column, value in zip(con.description, row)} for row in con.execute(query, [chembl_id, disease_id]).fetchall()])
-    known_drugs_aggregated.append(known_drugs)
+    known_drugs_aggregated = [{column[0]: value for column, value in zip(con.description, row)} for row in con.execute(query, [chembl_id, disease_id]).fetchall()]
+    if known_drugs_aggregated:
+        is_url_available = any(row['urls'] for row in known_drugs_aggregated)
+        max_phase = max(row['phase'] for row in known_drugs_aggregated)
+        max_status_for_max_phase = max((row['status'] for row in known_drugs_aggregated if row['phase'] == max_phase), key=lambda x: STATUS_NUM.get(x, 0))
+        if max_status_for_max_phase is None:
+            max_status_for_max_phase = 'N/A'
+        status_num = STATUS_NUM[max_status_for_max_phase]
+    else:
+        known_drugs_aggregated = []
+        is_url_available = False
+        max_phase = 0
+        max_status_for_max_phase = 'N/A'
+        status_num = 0
+
+    known_drugs_aggregated_column.append(known_drugs_aggregated)
+    is_url_available_column.append(is_url_available)
+    phase_column.append(max_phase)
+    status_column.append(max_status_for_max_phase)
+    status_num_column.append(status_num)
+
+
+df_results['Molecule Name'] = pd.Series(molecule_name_column)
+df_results['isUrlAvailable'] = pd.Series(is_url_available_column)
+df_results['isApproved'] = pd.Series(is_approved_column)
+df_results['phase'] = pd.Series(phase_column)
+df_results['status'] = pd.Series(status_column)
+df_results['status_num'] = pd.Series(status_num_column)
+df_results['fld_knownDrugsAggregated'] = pd.Series(known_drugs_aggregated_column)
+
+df_results = df_results[df_results["isUrlAvailable"]]
+
+# convert to list of dictionares
+results = df_results.to_dict('records')
+
+results.sort(key=lambda x: [x['ChEMBL ID'] == ref_chembl_id, x['Cosine Similarity'], x['isApproved'], x['phase'], x['status_num']], reverse=True)
 
 # Display top-k results based on the top 10-th cosine similarity
-if len(ranked_results) > TOP_K - 1:
-    ref_similarity = df_results.iloc[TOP_K - 1]["Cosine Similarity"]
+if len(results) > TOP_K - 1:
+    ref_similarity = results[TOP_K - 1]["Cosine Similarity"]
     print(f"\nTop {TOP_K} similarity threshold: {ref_similarity:.6f}")
 
     # filter the results based on the top-k threshold
-    df_top_k = df_results[df_results["Cosine Similarity"] >= ref_similarity]
+    results_top_k = [row['Cosine Similarity'] for row in results]
 else:
-    df_top_k = df_results
-
-df_top_k['fld_knownDrugsAggregated'] = pd.Series(known_drugs_aggregated)  # Add fld_knownDrugsAggregated column
+    results_top_k = results
 
 # Print header
 print(f"\nTop {TOP_K} Similarity Results for {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name}):\n")
-print(f"{'ChEMBL ID':<15} {'Cosine Similarity':<20} {'Molecule Name':<30} {'fld_knownDrugsAggregated'}")
-print("-" * 100)
+print(f"{'ChEMBL ID':<15} {'Molecule Name':<30} {'Cosine Similarity':<20} {'isApproved':<12} {'phase':<7} {'status_num':<12} {'status':<24} {'fld_knownDrugsAggregated'}")
+print("-" * 150)
 
 # Print each row explicitly to ensure all lines are visible without sorting
-for index, row in df_top_k.iterrows():
-    print(f"{row['ChEMBL ID']:<15} {row['Cosine Similarity']:<20.6f} {row['Molecule Name']:<30} {row['fld_knownDrugsAggregated'][:JSON_CHARS_TO_DISPLAY]}")
+for row in results:
+    print(f"{row['ChEMBL ID']:<15} {row['Molecule Name']:<30} {row['Cosine Similarity']:<20.6f} {row['isApproved']:<12} {row['phase']:<7.1f} {row['status_num']:<12} {row['status']:<24} {str(row['fld_knownDrugsAggregated'])[:JSON_CHARS_TO_DISPLAY]}")
 
 # Close connection
 con.close()
