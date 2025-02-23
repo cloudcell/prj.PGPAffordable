@@ -121,7 +121,7 @@ def search_targets(query: str):
     results = conn.execute(query_str, [f"%{query}%"]).fetchall()
     return [dict(zip([desc[0] for desc in conn.description], row)) for row in results]
 
-@app.get("/disease_chembl_similarity/{disease_id}/{chembl_id}", response_model=List[Dict])
+@app.get("/disease_chembl_similarity/{disease_id}/{chembl_id}", response_model=Dict)
 def get_disease_chembl_similarity(disease_id: str, chembl_id: str, top_k: int = Query(10, ge=1, le=100)):
     """Retrieve top-k similar substances for a given disease and ChEMBL ID."""
     
@@ -205,7 +205,9 @@ def get_disease_chembl_similarity(disease_id: str, chembl_id: str, top_k: int = 
         ranked_results[i]['status_num'] = status_num
         ranked_results[i]['fld_knownDrugsAggregated'] = known_drugs_aggregated
 
-    ranked_results = [row for row in ranked_results if row['isUrlAvailable'] or row['ChEMBL ID'] == chembl_id]
+    reference_drug = next(row for row in ranked_results if row['ChEMBL ID'] == chembl_id)
+
+    ranked_results = [row for row in ranked_results if row['isUrlAvailable'] and row['ChEMBL ID'] != chembl_id]
 
     ranked_results.sort(key=lambda x: [x['ChEMBL ID'] == chembl_id, x['Cosine Similarity'], x['isApproved'], x['phase'], x['status_num']], reverse=True)
 
@@ -216,7 +218,7 @@ def get_disease_chembl_similarity(disease_id: str, chembl_id: str, top_k: int = 
     else:
         results_top_k = ranked_results
 
-    return results_top_k
+    return {'reference_drug': reference_drug, 'similar_drugs': results_top_k}
 
 
 if __name__ == "__main__":

@@ -202,12 +202,14 @@ df_results['status'] = pd.Series(status_column)
 df_results['status_num'] = pd.Series(status_num_column)
 df_results['fld_knownDrugsAggregated'] = pd.Series(known_drugs_aggregated_column)
 
-df_results = df_results[df_results["isUrlAvailable"]]
+reference_drug = df_results[df_results['ChEMBL ID'] == ref_chembl_id].to_dict('records')[0]
+
+df_results = df_results[df_results["isUrlAvailable"] & (df_results['ChEMBL ID'] != ref_chembl_id)]
 
 # convert to list of dictionares
 results = df_results.to_dict('records')
 
-results.sort(key=lambda x: [x['ChEMBL ID'] == ref_chembl_id, x['Cosine Similarity'], x['isApproved'], x['phase'], x['status_num']], reverse=True)
+results.sort(key=lambda x: [x['Cosine Similarity'], x['isApproved'], x['phase'], x['status_num']], reverse=True)
 
 # Display top-k results based on the top 10-th cosine similarity
 if len(results) > TOP_K - 1:
@@ -218,6 +220,8 @@ if len(results) > TOP_K - 1:
     results_top_k = [row for row in results if row['Cosine Similarity'] >= ref_similarity]
 else:
     results_top_k = results
+
+results.insert(0, reference_drug)
 
 # Print header
 print(f"\nTop {TOP_K} Similarity Results for {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name}):\n")
