@@ -150,14 +150,14 @@ ranked_results = sorted(similarities, key=lambda x: x[1], reverse=True)
 df_results = pd.DataFrame(ranked_results, columns=["ChEMBL ID", "Cosine Similarity", "Molecule Name"])
 
 # Display top-k results based on the top 10-th cosine similarity
-ref_similarity = df_results.iloc[TOP_K - 1]["Cosine Similarity"]
-print(f"\nTop {TOP_K} similarity threshold: {ref_similarity:.6f}")
+if len(ranked_results) > TOP_K - 1:
+    ref_similarity = df_results.iloc[TOP_K - 1]["Cosine Similarity"]
+    print(f"\nTop {TOP_K} similarity threshold: {ref_similarity:.6f}")
 
-# filter the results based on the top-k threshold
-df_top_k = df_results[df_results["Cosine Similarity"] >= ref_similarity]
-
-# top_k = 250
-# df_top_k = df_results.head(top_k)
+    # filter the results based on the top-k threshold
+    df_top_k = df_results[df_results["Cosine Similarity"] >= ref_similarity]
+else:
+    df_top_k = df_results
 
 known_drugs_aggregated = []
 for index, row in df_top_k.iterrows():
