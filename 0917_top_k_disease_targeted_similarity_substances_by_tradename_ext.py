@@ -5,7 +5,7 @@ import pandas as pd
 
 JSON_CHARS_TO_DISPLAY = 100
 
-TOP_K = 10
+TOP_K = 30
 
 # Connect to DuckDB database
 db_path = "bio_data.duck.db"
