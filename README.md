@@ -1,3 +1,26 @@
+# How to Use This Software
+
+```
+# 1. Clone the repository to your local hard drive
+
+# 2. Run the following commands from within the project folder
+python3 -m venv venv
+pip install -r requirements.txt
+
+# 3. to download the database (might take 4-6 hours)
+python 5000_script_runner_contiguous.py
+
+# 4. to run the test
+python 0918_top_k_disease_targeted_similarity_sorted_by_evidence.py
+
+# 5. to run the server
+python 3014_server_full_scoring.py
+```
+
+
+
+---
+
 # Affordable
 Affordable is a DeSci and AI-agent-powered wiki for discovery and clinical validation of affordable medicine
 
