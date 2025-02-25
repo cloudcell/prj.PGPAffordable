@@ -51,8 +51,45 @@ conn.execute("""
 # Create "tbl_targets" table
 conn.execute("""
 CREATE TABLE IF NOT EXISTS tbl_targets (
-    target_id STRING PRIMARY KEY,
-    target_approvedName STRING
+    id STRING PRIMARY KEY,
+    approvedSymbol STRING,
+    biotype STRING,
+    transcriptIds STRING[],
+    canonicalTranscript STRING,
+    canonicalExons STRING[],
+    genomicLocation STRING,
+    approvedName STRING,
+    synonyms STRING,
+    symbolSynonyms STRING,
+    nameSynonyms STRING,
+    functionDescriptions STRING[],
+    subcellularLocations STRING,
+    obsoleteSymbols STRING,
+    obsoleteNames STRING,
+    proteinIds STRING,
+    dbXrefs STRING
+);
+""")
+
+conn.execute("""
+CREATE TABLE IF NOT EXISTS tbl_targets_tmp (
+    id STRING PRIMARY KEY,
+    approvedSymbol STRING,
+    biotype STRING,
+    transcriptIds STRING[],
+    canonicalTranscript STRING,
+    canonicalExons STRING[],
+    genomicLocation STRING,
+    approvedName STRING,
+    synonyms STRING,
+    symbolSynonyms STRING,
+    nameSynonyms STRING,
+    functionDescriptions STRING[],
+    subcellularLocations STRING,
+    obsoleteSymbols STRING,
+    obsoleteNames STRING,
+    proteinIds STRING,
+    dbXrefs STRING
 );
 """)
 
@@ -65,7 +102,7 @@ CREATE TABLE IF NOT EXISTS tbl_actions (
     actionType STRING,
     mechanismOfAction STRING,
     FOREIGN KEY (ChEMBL_id) REFERENCES tbl_substances(ChEMBL_id),
-    FOREIGN KEY (target_id) REFERENCES tbl_targets(target_id)
+    FOREIGN KEY (target_id) REFERENCES tbl_targets(id)
 )
 """)
 
@@ -83,9 +120,35 @@ CREATE TABLE IF NOT EXISTS tbl_refs (
 # Create "tbl_diseases" table
 conn.execute("""
 CREATE TABLE IF NOT EXISTS tbl_diseases (
-    disease_id STRING PRIMARY KEY,
+    id STRING PRIMARY KEY,
+    code STRING,
+    dbXRefs STRING[],
     name STRING,
-    description STRING
+    description STRING,
+    parents STRING[],
+    synonyms STRING,
+    ancestors STRING[],
+    descendants STRING[],
+    children STRING[],
+    therapeuticAreas STRING[],
+    ontology STRING
+);
+""")
+
+conn.execute("""
+CREATE TABLE IF NOT EXISTS tbl_diseases_tmp (
+    id STRING PRIMARY KEY,
+    code STRING,
+    dbXRefs STRING[],
+    name STRING,
+    description STRING,
+    parents STRING[],
+    synonyms STRING,
+    ancestors STRING[],
+    descendants STRING[],
+    children STRING[],
+    therapeuticAreas STRING[],
+    ontology STRING
 );
 """)
 
@@ -94,8 +157,8 @@ CREATE TABLE IF NOT EXISTS tbl_disease_target (
     disease_id STRING,
     target_id STRING,
     PRIMARY KEY(disease_id, target_id),
-    FOREIGN KEY (disease_id) REFERENCES tbl_diseases(disease_id),
-    FOREIGN KEY (target_id) REFERENCES tbl_targets(target_id)
+    FOREIGN KEY (disease_id) REFERENCES tbl_diseases(id),
+    FOREIGN KEY (target_id) REFERENCES tbl_targets(id)
 );
 """)
 
@@ -104,7 +167,7 @@ CREATE TABLE IF NOT EXISTS tbl_disease_substance (
     disease_id STRING,
     ChEMBL_id STRING,
     PRIMARY KEY(disease_id, ChEMBL_id),
-    FOREIGN KEY (disease_id) REFERENCES tbl_diseases(disease_id),
+    FOREIGN KEY (disease_id) REFERENCES tbl_diseases(id),
     FOREIGN KEY (ChEMBL_id) REFERENCES tbl_substances(ChEMBL_id)
 );
 """)

@@ -44,11 +44,14 @@ for filename in tqdm(files):
         # Process targets
         for target in row.get("targets", []):
             target_id = target.get("id")
-            target_name = target.get("approvedName")
 
             # Insert into tbl_targets table
-            q = 'INSERT OR IGNORE INTO tbl_targets VALUES ($target_id, $target_name)'
-            params = {'target_id': target_id, 'target_name': target_name}
+            q = '''
+            INSERT OR IGNORE INTO tbl_targets
+            SELECT * FROM tbl_targets_tmp
+            WHERE id = $target_id
+            '''
+            params = {'target_id': target_id}
             con.execute(q, params)
 
             action_id = f"{chembl_id}_{target_id}"
