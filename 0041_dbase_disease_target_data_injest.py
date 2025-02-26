@@ -14,7 +14,7 @@ con = duckdb.connect(db_path)
 
 files = [filename for filename in os.listdir(data_dir) if filename.startswith("disease_target_") and filename.endswith(".json")]
 
-for filename in tqdm(files):
+for filename in tqdm(sorted(files)):
     file_path = os.path.join(data_dir, filename)
     
     with open(file_path, "r", encoding="utf-8") as f:
