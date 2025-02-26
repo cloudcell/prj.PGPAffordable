@@ -27,7 +27,7 @@ for chembl_id in tqdm(molecule_ids):
 
 
 con.sql("SELECT * FROM tbl_actions WHERE actionType = 'UNIDENTIFIED' LIMIT 10").show()
-print(f'tbl_actions not UNIDENTIFIED', con.execute("SELECT count(*) FROM tbl_actions WHERE actionType != 'UNIDENTIFIED'").fetchone()[0], 'rows')
+print(f'tbl_actions not UNIDENTIFIED:', con.execute("SELECT count(*) FROM tbl_actions WHERE actionType != 'UNIDENTIFIED'").fetchone()[0], 'rows')
 print(f'tbl_actions UNIDENTIFIED:', con.execute("SELECT count(*) FROM tbl_actions WHERE actionType = 'UNIDENTIFIED'").fetchone()[0], 'rows')
 
 con.close()
