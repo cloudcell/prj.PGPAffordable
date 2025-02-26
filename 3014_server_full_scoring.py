@@ -70,7 +70,7 @@ def get_target(target_id: str):
 def get_disease(disease_id: str):
     """Retrieve details of a disease by its ID."""
     query = """
-        SELECT * FROM tbl_diseases WHERE disease_id = ?
+        SELECT * FROM tbl_diseases WHERE id = ?
     """
     result = conn.execute(query, [disease_id]).fetchone()
     if not result:
@@ -83,7 +83,7 @@ def get_disease_targets(disease_id: str):
     """Retrieve all targets associated with a given disease."""
     query = """
         SELECT t.target_id, t.target_approvedName FROM tbl_disease_target dt
-        JOIN tbl_targets t ON dt.target_id = t.target_id WHERE dt.disease_id = ?
+        JOIN tbl_targets t ON dt.target_id = t.id WHERE dt.disease_id = ?
     """
     results = conn.execute(query, [disease_id]).fetchall()
     if not results:

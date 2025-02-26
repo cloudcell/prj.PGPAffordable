@@ -12,7 +12,7 @@ from tqdm import tqdm
 data_dir = "data_tmp"
 
 con = duckdb.connect("bio_data.duck.db")
-targets = con.execute("SELECT target_id FROM tbl_targets").fetchall()
+targets = con.execute("SELECT id FROM tbl_targets").fetchall()
 con.close()
 
 # Convert to a list of IDs

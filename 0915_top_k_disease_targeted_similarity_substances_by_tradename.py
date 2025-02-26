@@ -10,10 +10,10 @@ con = duckdb.connect(db_path)
 user_input = input("Enter the disease ID, name, or description: ").strip()
 
 if user_input.startswith(("EFO_", "DOID:")) or user_input.isdigit():
-    query = "SELECT disease_id, description FROM tbl_diseases WHERE disease_id = ?"
+    query = "SELECT id, description FROM tbl_diseases WHERE disease_id = ?"
     disease_matches = con.execute(query, [user_input]).fetchdf()
 else:
-    query = "SELECT disease_id, name, description FROM tbl_diseases WHERE name ILIKE ? OR description ILIKE ?"
+    query = "SELECT id, name, description FROM tbl_diseases WHERE name ILIKE ? OR description ILIKE ?"
     disease_matches = con.execute(query, [f"%{user_input}%", f"%{user_input}%"]).fetchdf()
 
 if disease_matches.empty:
