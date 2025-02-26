@@ -77,14 +77,14 @@ for root, dirs, files in os.walk(DATA_DIR):
             continue
         parquet_files_list.append(os.path.join(root, fname))
 
-disease_target_list = []
+disease_target_list = set()
 for parquet_file in tqdm(parquet_files_list):
     df = pd.read_parquet(parquet_file, columns=['diseaseId', 'targetId'])
     for _, row in df.iterrows():
-        disease_target_list.append((row['diseaseId'], row['targetId']))
+        disease_target_list.add((row['diseaseId'], row['targetId']))
 
 q = 'INSERT OR IGNORE INTO tbl_disease_target VALUES ($disease_id, $target_id)'
-for disease_id, target_id in tqdm(set(disease_target_list)):
+for disease_id, target_id in tqdm(disease_target_list):
     params = {'disease_id': disease_id, 'target_id': target_id}
     con.execute(q, params)
 
