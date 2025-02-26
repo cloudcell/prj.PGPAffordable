@@ -41,6 +41,8 @@ ACTION_TYPES = {
 db_path = "bio_data.duck.db"
 con = duckdb.connect(db_path)
 
+con.executemany('INSERT OR REPLACE INTO tbl_action_types VALUES (?, ?)', list(ACTION_TYPES.items()))
+
 action_type_list = [row[0] for row in con.execute('SELECT DISTINCT actionType FROM tbl_actions').fetchall()]
 
 for actionType in sorted(action_type_list):
