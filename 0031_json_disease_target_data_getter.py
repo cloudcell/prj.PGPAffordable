@@ -78,7 +78,7 @@ for disease_id in tqdm(sorted(disease_ids), smoothing=1):
     drug_data = fetch_associated_targets_data(disease_id)
     sleep(0.1)  # Respect API rate limits
 
-    if drug_data:
+    if drug_data is not None:
         with open(output_file_tmp, "w", encoding="utf-8") as f:
             json.dump(drug_data, f, indent=4)
         shutil.move(output_file_tmp, output_file)

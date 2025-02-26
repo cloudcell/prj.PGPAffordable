@@ -2,6 +2,8 @@ import os
 import json
 import duckdb
 
+from tqdm import tqdm
+
 # Define paths
 DATA_DIR = "data/202409XX/targets"  # Change this to your actual directory path
 DUCKDB_PATH = "bio_data.duck.db"
@@ -33,7 +35,7 @@ data_list = [[
 ]]
 
 # Iterate through files in the directory
-for filename in sorted(os.listdir(DATA_DIR)):
+for filename in tqdm(sorted(os.listdir(DATA_DIR))):
     if filename.startswith("part-") and filename.endswith(".json"):  # Adjust based on file format
         file_path = os.path.join(DATA_DIR, filename)
 
