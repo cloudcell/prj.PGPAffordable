@@ -84,7 +84,7 @@ for parquet_file in tqdm(parquet_files_list):
         disease_target_list.add((row['diseaseId'], row['targetId']))
 
 q = 'INSERT OR IGNORE INTO tbl_disease_target VALUES ($disease_id, $target_id)'
-for disease_id, target_id in tqdm(disease_target_list):
+for disease_id, target_id in tqdm(disease_target_list, smoothing=1):
     params = {'disease_id': disease_id, 'target_id': target_id}
     con.execute(q, params)
 
