@@ -8,3 +8,5 @@ scipy
 seaborn
 fastapi
 uvicorn
+parquet
+pyarrow
