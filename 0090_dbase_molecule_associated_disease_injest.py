@@ -25,12 +25,6 @@ for filename in tqdm(files):
 
     for row in associated_diseases_list:
         disease_id = row['id']
-        name = row['name']
-        description = row.get('description')
-
-        q = 'INSERT OR IGNORE INTO tbl_diseases VALUES ($disease_id, $name, $description)'
-        params = {'disease_id': disease_id, 'name': name, 'description': description}
-        con.execute(q, params)
 
         q = 'INSERT OR IGNORE INTO tbl_disease_substance VALUES ($disease_id, $chembl_id)'
         params = {'disease_id': disease_id, 'chembl_id': chembl_id}
