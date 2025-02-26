@@ -35,6 +35,7 @@ ACTION_TYPES = {
     'STABILISER': 1,
     'SUBSTRATE': 1,
     'VACCINE ANTIGEN': -1,
+    'UNIDENTIFIED': 0.000001,  # This is a placeholder for any unidentified actionType (obtained via indirect inference via DRUG->DISEASE->TARGET)
 }
 
 db_path = "bio_data.duck.db"
