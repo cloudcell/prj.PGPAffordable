@@ -24,12 +24,12 @@ elif len(disease_matches) > 1:
     print("\nMultiple diseases found:\n")
     print(disease_matches.to_string(index=False))
     disease_id = input("Enter the exact disease ID from the list: ").strip()
-    if disease_id not in disease_matches["disease_id"].values:
+    if disease_id not in disease_matches["id"].values:
         print("Invalid selection.")
         con.close()
         exit()
 else:
-    disease_id = disease_matches.iloc[0]["disease_id"]
+    disease_id = disease_matches.iloc[0]["id"]
     print(f"Using disease ID: {disease_id}")
 
 # ---------------------- TARGET SELECTION ----------------------
