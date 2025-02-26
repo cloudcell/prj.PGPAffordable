@@ -7,6 +7,11 @@ import json
 import pandas as pd
 from tqdm import tqdm
 
+
+TEMP_TSV_PATH = "data_tmp/temp_data.tsv"
+BATCH_SIZE = 100 # rows
+NULL = '<NULL>'
+
 # Connect to DuckDB database
 db_path = "bio_data.duck.db"
 con = duckdb.connect(db_path)
@@ -40,14 +45,25 @@ con.execute(create_table_query)
 
 # Insert data into DuckDB with progress bar
 data_tuples = [tuple([chembl_id] + row.tolist()) for chembl_id, row in vector_array.iterrows()]
-placeholders = ", ".join(["?"] * (len(target_ids) + 1))
-insert_query = f"INSERT OR REPLACE INTO tbl_vector_array VALUES ({placeholders})"
 
-for data in tqdm(data_tuples, desc="Inserting data into DuckDB"):
-    con.execute(insert_query, data)
+header = ['ChEMBL_id'] + list(vector_array.columns)
+
+for i1 in tqdm(range(int(len(data_tuples) / BATCH_SIZE))):
+    i1 *= BATCH_SIZE
+    i2 = i1 + BATCH_SIZE
+    with open(TEMP_TSV_PATH, 'w', encoding='utf-8') as f:
+        f.write('\t'.join(map(str, header)) + '\n')
+        f.write('\n'.join('\t'.join(map(str, row)) for row in data_tuples[i1:i2]))
+
+    con.execute(f"""
+        COPY tbl_vector_array FROM '{TEMP_TSV_PATH}'
+        (FORMAT CSV, HEADER TRUE, DELIMITER '\t', QUOTE '', ESCAPE '', NULL '{NULL}', AUTO_DETECT FALSE)
+    """)
 
 # Verify insertion
 con.sql("SELECT * FROM tbl_vector_array LIMIT 10").show()
+print(f'{con.execute("SELECT count(*) FROM tbl_vector_array").fetchone()[0]} rows')
+print(f'{len(con.execute("SELECT * FROM tbl_vector_array LIMIT 1").fetchone())} columns')
 
 # Close connection
 con.close()
