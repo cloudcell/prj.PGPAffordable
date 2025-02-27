@@ -204,12 +204,12 @@ df_results['fld_knownDrugsAggregated'] = pd.Series(known_drugs_aggregated_column
 
 reference_drug = df_results[df_results['ChEMBL ID'] == ref_chembl_id].to_dict('records')[0]
 
-df_results = df_results[df_results["isUrlAvailable"] & (df_results['ChEMBL ID'] != ref_chembl_id)]
+df_results = df_results[(df_results['ChEMBL ID'] != ref_chembl_id)]
 
 # convert to list of dictionares
 results = df_results.to_dict('records')
 
-results.sort(key=lambda x: [x['Cosine Similarity'], x['isApproved'], x['phase'], x['status_num']], reverse=True)
+results.sort(key=lambda x: [x['Cosine Similarity'], x['isApproved'], x['isUrlAvailable'], x['phase'], x['status_num']], reverse=True)
 
 # Display top-k results based on the top 10-th cosine similarity
 if len(results) > TOP_K - 1:
@@ -225,12 +225,12 @@ results.insert(0, reference_drug)
 
 # Print header
 print(f"\nTop {TOP_K} Similarity Results for {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name}):\n")
-print(f"{'ChEMBL ID':<15} {'Molecule Name':<30} {'Cosine Similarity':<20} {'isApproved':<12} {'phase':<7} {'status_num':<12} {'status':<24} {'fld_knownDrugsAggregated'}")
+print(f"{'ChEMBL ID':<15} {'Molecule Name':<30} {'Cosine Similarity':<20} {'isApproved':<12} {'isUrlAvailable':<15} {'phase':<7} {'status_num':<12} {'status':<24} {'fld_knownDrugsAggregated'}")
 print("-" * 150)
 
 # Print each row explicitly to ensure all lines are visible without sorting
 for row in results:
-    print(f"{row['ChEMBL ID']:<15} {row['Molecule Name']:<30} {row['Cosine Similarity']:<20.6f} {row['isApproved']:<12} {row['phase']:<7.1f} {row['status_num']:<12} {row['status']:<24} {str(row['fld_knownDrugsAggregated'])[:JSON_CHARS_TO_DISPLAY]}")
+    print(f"{row['ChEMBL ID']:<15} {row['Molecule Name']:<30} {row['Cosine Similarity']:<20.6f} {row['isApproved']:<12} {row['isUrlAvailable']:<15} {row['phase']:<7.1f} {row['status_num']:<12} {row['status']:<24} {str(row['fld_knownDrugsAggregated'])[:JSON_CHARS_TO_DISPLAY]}")
 
 # Close connection
 con.close()
