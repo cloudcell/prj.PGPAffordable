@@ -60,6 +60,8 @@
 
 
 import os
+import logging
+import datetime as dt
 
 import duckdb
 import pandas as pd
@@ -67,7 +69,12 @@ from tqdm import tqdm
 
 
 DATA_DIR = "data/202409XX/evidence"
+LOGS_DIR = 'logs'
 db_path = "bio_data.duck.db"
+
+os.makedirs(LOGS_DIR, exist_ok=True)
+logging.basicConfig(filename=os.path.join(LOGS_DIR, dt.datetime.now().isoformat().replace(':', '-') + '.log'), format='%(levelname)s:%(message)s', level=logging.DEBUG)
+
 con = duckdb.connect(db_path)
 
 parquet_files_list = []
@@ -78,7 +85,7 @@ for root, dirs, files in os.walk(DATA_DIR):
         parquet_files_list.append(os.path.join(root, fname))
 
 disease_target_list = set()
-for parquet_file in tqdm(parquet_files_list):
+for parquet_file in tqdm(parquet_files_list, smoothing=1):
     df = pd.read_parquet(parquet_file, columns=['diseaseId', 'targetId'])
     for _, row in df.iterrows():
         disease_target_list.add((row['diseaseId'], row['targetId']))
@@ -86,7 +93,10 @@ for parquet_file in tqdm(parquet_files_list):
 q = 'INSERT OR IGNORE INTO tbl_disease_target VALUES ($disease_id, $target_id)'
 for disease_id, target_id in tqdm(disease_target_list, smoothing=1):
     params = {'disease_id': disease_id, 'target_id': target_id}
-    con.execute(q, params)
+    try:
+        con.execute(q, params)
+    except Exception as e:
+        logging.error(str(e))
 
 print(f'tbl_disease_target: {con.execute("SELECT count(*) FROM tbl_disease_target").fetchone()[0]} rows')
 

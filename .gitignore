@@ -12,4 +12,4 @@ data/*/*
 *.csv
 data_tmp/*
 !data_tmp/README.md
-
+logs/
