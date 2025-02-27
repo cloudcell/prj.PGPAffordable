@@ -221,7 +221,7 @@ if len(results) > TOP_K - 1:
 else:
     results_top_k = results
 
-results.insert(0, reference_drug)
+results_top_k.insert(0, reference_drug)
 
 # Print header
 print(f"\nTop {TOP_K} Similarity Results for {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name}):\n")
@@ -229,7 +229,7 @@ print(f"{'ChEMBL ID':<15} {'Molecule Name':<30} {'Cosine Similarity':<20} {'isAp
 print("-" * 150)
 
 # Print each row explicitly to ensure all lines are visible without sorting
-for row in results:
+for row in results_top_k:
     print(f"{row['ChEMBL ID']:<15} {row['Molecule Name']:<30} {row['Cosine Similarity']:<20.6f} {row['isApproved']:<12} {row['isUrlAvailable']:<15} {row['phase']:<7.1f} {row['status_num']:<12} {row['status']:<24} {str(row['fld_knownDrugsAggregated'])[:JSON_CHARS_TO_DISPLAY]}")
 
 # Close connection
