@@ -2,10 +2,11 @@ import json
 import duckdb
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
 JSON_CHARS_TO_DISPLAY = 100
 
-TOP_K = 30
+TOP_K = 100
 
 STATUS_NUM = {
     'Active, not recruiting': 4,
@@ -27,8 +28,8 @@ con = duckdb.connect(db_path)
 # ---------------------- DISEASE SELECTION ----------------------
 user_input = input("Enter the disease ID, name, or description: ").strip()
 
-if user_input.startswith(("EFO_", "DOID:")) or user_input.isdigit():
-    query = "SELECT id, description FROM tbl_diseases WHERE disease_id = ?"
+if user_input.startswith(("MONDO_", "EFO_", "DOID:")) or user_input.isdigit():
+    query = "SELECT id, description FROM tbl_diseases WHERE id = ?"
     disease_matches = con.execute(query, [user_input]).fetchdf()
 else:
     query = "SELECT id, name, description FROM tbl_diseases WHERE name ILIKE ? OR description ILIKE ?"
@@ -144,7 +145,7 @@ vec_ref = np.array(list(vector_data[ref_chembl_id].values()), dtype=np.float32) 
 
 # ---------------------- SIMILARITY CALCULATION ----------------------
 similarities = []
-for chembl_id, vector in vector_data.items():
+for chembl_id, vector in tqdm(vector_data.items()):
     vec = np.array(list(vector.values()), dtype=np.float32) * mask  # Apply mask to each vector
     norm_product = np.linalg.norm(vec_ref) * np.linalg.norm(vec)
     
@@ -164,7 +165,7 @@ phase_column = []
 status_column = []
 status_num_column = []
 known_drugs_aggregated_column = []
-for index, row in df_results.iterrows():
+for index, row in tqdm(df_results.iterrows()):
     chembl_id = row['ChEMBL ID']
     query = "SELECT COALESCE(name, 'N/A'), isApproved FROM tbl_substances WHERE chembl_id = ?"
     molecule_name, is_approved = con.execute(query, [chembl_id]).fetchone()
