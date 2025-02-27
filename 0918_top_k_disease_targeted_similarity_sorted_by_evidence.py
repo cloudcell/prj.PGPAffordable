@@ -217,7 +217,7 @@ df_results = df_results[(df_results['ChEMBL ID'] != ref_chembl_id)]
 results = df_results[df_results['isApproved'] | df_results['isUrlAvailable']]
 
 # convert to list of dictionares
-results = df_results.to_dict('records')
+results = results.to_dict('records')
 
 results.sort(key=lambda x: [x['Similarity'], x['isApproved'], x['isUrlAvailable'], x['phase'], x['status_num']], reverse=True)
 
@@ -250,7 +250,7 @@ con.close()
 results = df_results[(df_results['isApproved'] != 1) & (df_results['isUrlAvailable'] != 1)]
 
 # convert to list of dictionares
-results = df_results.to_dict('records')
+results = results.to_dict('records')
 
 results.sort(key=lambda x: [x['Similarity'], x['isApproved'], x['isUrlAvailable'], x['phase'], x['status_num']], reverse=True)
 
