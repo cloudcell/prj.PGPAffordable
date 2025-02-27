@@ -165,7 +165,7 @@ phase_column = []
 status_column = []
 status_num_column = []
 known_drugs_aggregated_column = []
-for index, row in tqdm(df_results.iterrows()):
+for index, row in tqdm(df_results.iterrows(), total=len(df_results)):
     chembl_id = row['ChEMBL ID']
     query = "SELECT COALESCE(name, 'N/A'), isApproved FROM tbl_substances WHERE chembl_id = ?"
     molecule_name, is_approved = con.execute(query, [chembl_id]).fetchone()
