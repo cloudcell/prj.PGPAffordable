@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 JSON_CHARS_TO_DISPLAY = 100
 
-TOP_K = 100
+TOP_K = 25
 
 STATUS_NUM = {
     'Active, not recruiting': 4,
@@ -234,7 +234,7 @@ else:
 results_top_k.insert(0, reference_drug)
 
 # Print header
-print(f"\nTop {TOP_K} Similarity Results for {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name}):\n")
+print(f"\nTop {TOP_K} Primary Similarity Results for {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name}):\n")
 print(f"{'ChEMBL ID':<15} {'Molecule Name':<30} {'Similarity':<20} {'isApproved':<12} {'isUrlAvailable':<15} {'phase':<7} {'status_num':<12} {'status':<24} {'fld_knownDrugsAggregated'}")
 print("-" * 150)
 
@@ -267,7 +267,7 @@ else:
 results_top_k.insert(0, reference_drug)
 
 # Print header
-print(f"\nTop {TOP_K} Similarity Results for {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name}):\n")
+print(f"\nTop {TOP_K} Secondary Similarity Results for {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name}):\n")
 print(f"{'ChEMBL ID':<15} {'Molecule Name':<30} {'Similarity':<20} {'isApproved':<12} {'isUrlAvailable':<15} {'phase':<7} {'status_num':<12} {'status':<24} {'fld_knownDrugsAggregated'}")
 print("-" * 150)
 

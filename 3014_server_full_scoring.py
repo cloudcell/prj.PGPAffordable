@@ -218,7 +218,7 @@ def get_disease_chembl_similarity(disease_id: str, chembl_id: str, top_k: int = 
     else:
         results_top_k = ranked_results
 
-    return {'reference_drug': reference_drug, 'similar_drugs': results_top_k}
+    return {'reference_drug': reference_drug, 'similar_drugs_primary': results_top_k_lvl1, 'similar_drugs_secondary': results_top_k_lvl2}
 
 
 if __name__ == "__main__":
