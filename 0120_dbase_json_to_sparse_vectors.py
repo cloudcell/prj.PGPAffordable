@@ -34,6 +34,8 @@ for chembl_id, vector_json in tqdm(vector_data, desc="Processing molecular vecto
         if target_id in vector_array.columns:
             vector_array.at[chembl_id, target_id] = value
 
+con.execute("DROP TABLE IF EXISTS tbl_vector_array")
+
 # Create a new table for the vector array
 column_definitions = ", ".join([f'"{col}" FLOAT' for col in target_ids])
 create_table_query = f"""
