@@ -4,7 +4,7 @@ import json
 from tqdm import tqdm
 
 TEMP_TSV_PATH = "data_tmp/temp_data.tsv"
-BATCH_SIZE = 100 # rows
+BATCH_SIZE = 10 # rows
 NULL = '<NULL>'
 
 # Connect to DuckDB database
