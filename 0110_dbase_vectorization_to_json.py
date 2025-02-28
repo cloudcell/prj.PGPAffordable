@@ -3,6 +3,10 @@ import numpy as np
 import json
 from tqdm import tqdm
 
+TEMP_TSV_PATH = "data_tmp/temp_data.tsv"
+BATCH_SIZE = 100 # rows
+NULL = '<NULL>'
+
 # Connect to DuckDB database
 db_path = "bio_data.duck.db"
 con = duckdb.connect(db_path)
@@ -37,6 +41,7 @@ for chembl_id, target_vector in tqdm(molecular_vectors.items(), desc="Computing 
     vectorized_data.append((chembl_id, vector_json))
 
 # Create a new table for storing molecular vectors
+con.execute('DROP TABLE IF EXISTS tbl_molecular_vectors')
 con.execute("""
     CREATE TABLE IF NOT EXISTS tbl_molecular_vectors (
         ChEMBL_id STRING PRIMARY KEY,
@@ -45,10 +50,18 @@ con.execute("""
 """)
 
 # Insert vectorized data into the table
-for data in tqdm(vectorized_data, desc="Inserting vectorized data"):
-    con.execute("""
-        INSERT OR REPLACE INTO tbl_molecular_vectors (ChEMBL_id, vector) VALUES (?, ?)
-    """, data)
+header = ['ChEMBL_id', 'vector']
+for i1 in tqdm(range(int(len(vectorized_data) / BATCH_SIZE)), desc="Inserting vectorized data"):
+    i1 *= BATCH_SIZE
+    i2 = i1 + BATCH_SIZE
+    with open(TEMP_TSV_PATH, 'w', encoding='utf-8') as f:
+        f.write('\t'.join(map(str, header)) + '\n')
+        f.write('\n'.join('\t'.join(map(str, row)) for row in vectorized_data[i1:i2]))
+
+    con.execute(f"""
+        COPY tbl_molecular_vectors FROM '{TEMP_TSV_PATH}'
+        (FORMAT CSV, HEADER TRUE, DELIMITER '\t', QUOTE '', ESCAPE '', NULL '{NULL}', AUTO_DETECT FALSE)
+    """)
 
 # Verify insertion
 con.sql("SELECT * FROM tbl_molecular_vectors LIMIT 10").show()
