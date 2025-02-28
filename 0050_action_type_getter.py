@@ -25,7 +25,7 @@ ACTION_TYPES = {
     'NEGATIVE ALLOSTERIC MODULATOR': -1,
     'NEGATIVE MODULATOR': -1,
     'OPENER': 1,
-    'OTHER': 0.00001,
+    'OTHER': 0.01,
     'PARTIAL AGONIST': 1,
     'POSITIVE ALLOSTERIC MODULATOR': 1,
     'POSITIVE MODULATOR': 1,
@@ -35,7 +35,7 @@ ACTION_TYPES = {
     'STABILISER': 1,
     'SUBSTRATE': 1,
     'VACCINE ANTIGEN': -1,
-    'UNIDENTIFIED': 0.000001,  # This is a placeholder for any unidentified actionType (obtained via indirect inference via DRUG->DISEASE->TARGET)
+    'UNIDENTIFIED': 0.0001,  # This is a placeholder for any unidentified actionType (obtained via indirect inference via DRUG->DISEASE->TARGET)
 }
 
 db_path = "bio_data.duck.db"
