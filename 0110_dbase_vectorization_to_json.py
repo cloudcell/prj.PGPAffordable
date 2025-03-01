@@ -2,6 +2,7 @@ import duckdb
 import numpy as np
 import json
 from tqdm import tqdm
+import gc
 
 TEMP_TSV_PATH = "data_tmp/temp_data.tsv"
 BATCH_SIZE = 10 # rows
@@ -28,6 +29,9 @@ for chembl_id, target_id, value in tqdm(action_data, desc="Processing actions"):
         molecular_vectors[chembl_id][target_id] = []
     molecular_vectors[chembl_id][target_id].append(value)
 
+del action_data
+gc.collect()
+
 # Compute simple average for each target and normalize vectors
 vectorized_data = []
 for chembl_id, target_vector in tqdm(molecular_vectors.items(), desc="Computing averages and normalization"):
@@ -39,6 +43,9 @@ for chembl_id, target_vector in tqdm(molecular_vectors.items(), desc="Computing 
         values /= norm
     vector_json = json.dumps(dict(zip(target_ids, values.tolist())))
     vectorized_data.append((chembl_id, vector_json))
+
+del molecular_vectors
+gc.collect()
 
 # Create a new table for storing molecular vectors
 con.execute('DROP TABLE IF EXISTS tbl_molecular_vectors')
