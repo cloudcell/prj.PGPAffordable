@@ -30,7 +30,7 @@ with open(TEMP_TSV_PATH, "r", encoding='utf-8') as f:
     header = next(f)
 
     # Create a new table for the vector array
-    column_definitions = ", ".join([f'"{col}" FLOAT' for col in header[1:]])
+    column_definitions = ", ".join([f'"{col}" FLOAT' for col in header.split('\t')[1:]])
     create_table_query = f"""
         CREATE TABLE IF NOT EXISTS tbl_vector_array (
             ChEMBL_id STRING PRIMARY KEY, {column_definitions}
