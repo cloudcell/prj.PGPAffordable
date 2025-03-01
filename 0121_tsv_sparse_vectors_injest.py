@@ -27,7 +27,7 @@ def save_batch_to_db(con: duckdb.DuckDBPyConnection, batch: list[str]):
 con.execute("DROP TABLE IF EXISTS tbl_vector_array")
 
 with open(TEMP_TSV_PATH, "r", encoding='utf-8') as f:
-    header = next(f)
+    header = next(f).strip()
 
     # Create a new table for the vector array
     column_definitions = ", ".join([f'"{col}" FLOAT' for col in header.split('\t')[1:]])
