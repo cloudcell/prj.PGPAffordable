@@ -3,6 +3,7 @@ This script is used to create a matrix with rows-vectors from the generated vect
 """
 import duckdb
 from tqdm import tqdm
+import gc
 
 
 TEMP_TSV_PATH = "data_tmp/temp_data.tsv"
@@ -12,7 +13,10 @@ NULL = '<NULL>'
 
 # Connect to DuckDB database and create a huge table with the molecular vectors
 db_path = "bio_data.duck.db"
-con = duckdb.connect(db_path, read_only=False, config={'max_memory':'8GB'})
+con = duckdb.connect(db_path, read_only=False, config={'max_memory':'64GB'})
+
+# set memory limit
+# con.execute("PRAGMA memory_limit = 64GB")  # enable this in the future and test
 
 total = con.execute("SELECT count(*) FROM tbl_molecular_vectors").fetchone()[0]
 
@@ -20,6 +24,9 @@ def save_batch_to_db(con: duckdb.DuckDBPyConnection, batch: list[str]):
     with open(TEMP_TSV_PATH_BATCH, 'w', encoding='utf-8') as f:
         f.write('\n'.join(batch))
     con.execute(f"""
+        SET preserve_insertion_order = false;
+        SET temp_directory = './tmp/duckdb/';
+        
         COPY tbl_vector_array FROM '{TEMP_TSV_PATH_BATCH}'
         (FORMAT CSV, HEADER TRUE, DELIMITER '\t', QUOTE '', ESCAPE '', NULL '{NULL}', AUTO_DETECT FALSE)
     """)
