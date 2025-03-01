@@ -23,7 +23,7 @@ target_ids = [row[0] for row in con.execute(targets_query).fetchall()]
 
 # Fetch all vectorized molecular profiles
 vectors_query = "SELECT ChEMBL_id, vector FROM tbl_molecular_vectors"
-vector_data = con.execute(vectors_query).fetchall()  #[:10]
+vector_data = con.execute(vectors_query).fetchall()  # [:50]
 
 con.close()
 
@@ -50,7 +50,7 @@ gc.collect()
 
 with open(TEMP_TSV_PATH, 'w', encoding='utf-8') as f:
     f.write('\t'.join(map(str, header)) + '\n')
-    for i1 in tqdm(range(int(len(data_tuples) / BATCH_SIZE))):
+    for i1 in tqdm(range(int(len(data_tuples) / BATCH_SIZE)), desc="Writing to TSV"):
         i1 *= BATCH_SIZE
         i2 = i1 + BATCH_SIZE
         f.write('\n'.join('\t'.join(map(str, row)) for row in data_tuples[i1:i2]) + '\n')
