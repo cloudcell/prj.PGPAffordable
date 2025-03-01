@@ -6,6 +6,7 @@ import numpy as np
 import json
 import pandas as pd
 from tqdm import tqdm
+import gc
 
 
 TEMP_TSV_PATH = "data_tmp/temp_data.tsv"
@@ -34,6 +35,9 @@ for chembl_id, vector_json in tqdm(vector_data, desc="Processing molecular vecto
         if target_id in vector_array.columns:
             vector_array.at[chembl_id, target_id] = value
 
+del vector_data
+gc.collect()
+
 con.execute("DROP TABLE IF EXISTS tbl_vector_array")
 
 # Create a new table for the vector array
@@ -49,6 +53,9 @@ con.execute(create_table_query)
 data_tuples = [tuple([chembl_id] + row.tolist()) for chembl_id, row in vector_array.iterrows()]
 
 header = ['ChEMBL_id'] + list(vector_array.columns)
+
+del vector_array
+gc.collect()
 
 for i1 in tqdm(range(int(len(data_tuples) / BATCH_SIZE))):
     i1 *= BATCH_SIZE
