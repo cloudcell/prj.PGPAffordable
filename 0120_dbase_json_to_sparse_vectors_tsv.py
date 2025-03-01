@@ -53,6 +53,6 @@ with open(TEMP_TSV_PATH, 'w', encoding='utf-8') as f:
     for i1 in tqdm(range(int(len(data_tuples) / BATCH_SIZE))):
         i1 *= BATCH_SIZE
         i2 = i1 + BATCH_SIZE
-        f.write('\n'.join('\t'.join(map(str, row)) for row in data_tuples[i1:i2]))
+        f.write('\n'.join('\t'.join(map(str, row)) for row in data_tuples[i1:i2]) + '\n')
 
 print(f"✅ Vector array table saved in {TEMP_TSV_PATH}.")
