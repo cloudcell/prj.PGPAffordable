@@ -10,9 +10,9 @@ TEMP_TSV_PATH_BATCH = "data_tmp/temp_data_batch.tsv"  # for batch insertion
 BATCH_SIZE = 10 # rows
 NULL = '<NULL>'
 
-# Connect to DuckDB database
+# Connect to DuckDB database and create a huge table with the molecular vectors
 db_path = "bio_data.duck.db"
-con = duckdb.connect(db_path)
+con = duckdb.connect(db_path, read_only=False, config={'max_memory':'16GB'})
 
 total = con.execute("SELECT count(*) FROM tbl_molecular_vectors").fetchone()[0]
 
