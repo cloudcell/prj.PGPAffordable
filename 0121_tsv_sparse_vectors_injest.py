@@ -12,7 +12,7 @@ NULL = '<NULL>'
 
 # Connect to DuckDB database and create a huge table with the molecular vectors
 db_path = "bio_data.duck.db"
-con = duckdb.connect(db_path, read_only=False, config={'max_memory':'16GB'})
+con = duckdb.connect(db_path, read_only=False, config={'max_memory':'8GB'})
 
 total = con.execute("SELECT count(*) FROM tbl_molecular_vectors").fetchone()[0]
 
