@@ -23,7 +23,7 @@ target_ids = [row[0] for row in con.execute(targets_query).fetchall()]
 
 # Fetch all vectorized molecular profiles
 vectors_query = "SELECT ChEMBL_id, vector FROM tbl_molecular_vectors"
-vector_data = con.execute(vectors_query).fetchall()
+vector_data = con.execute(vectors_query).fetchall()  #[:10]
 
 con.close()
 

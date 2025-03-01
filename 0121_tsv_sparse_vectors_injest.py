@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 
 TEMP_TSV_PATH = "data_tmp/temp_data.tsv"
-TEMP_TSV_PATH_2 = "data_tmp/temp_data_2.tsv"
+TEMP_TSV_PATH_BATCH = "data_tmp/temp_data_batch.tsv"  # for batch insertion
 BATCH_SIZE = 10 # rows
 NULL = '<NULL>'
 
@@ -17,10 +17,10 @@ con = duckdb.connect(db_path)
 total = con.execute("SELECT count(*) FROM tbl_molecular_vectors").fetchone()[0]
 
 def save_batch_to_db(con: duckdb.DuckDBPyConnection, batch: list[str]):
-    with open(TEMP_TSV_PATH_2, 'w', encoding='utf-8') as f:
+    with open(TEMP_TSV_PATH_BATCH, 'w', encoding='utf-8') as f:
         f.write('\n'.join(batch))
     con.execute(f"""
-        COPY tbl_vector_array FROM '{TEMP_TSV_PATH_2}'
+        COPY tbl_vector_array FROM '{TEMP_TSV_PATH_BATCH}'
         (FORMAT CSV, HEADER TRUE, DELIMITER '\t', QUOTE '', ESCAPE '', NULL '{NULL}', AUTO_DETECT FALSE)
     """)
 
