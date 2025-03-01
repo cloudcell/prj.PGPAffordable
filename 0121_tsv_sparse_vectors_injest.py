@@ -20,7 +20,7 @@ def save_batch_to_db(con: duckdb.DuckDBPyConnection, batch: list[str]):
     with open(TEMP_TSV_PATH_2, 'w', encoding='utf-8') as f:
         f.write('\n'.join(batch))
     con.execute(f"""
-        COPY tbl_vector_array FROM '{TEMP_TSV_PATH}'
+        COPY tbl_vector_array FROM '{TEMP_TSV_PATH_2}'
         (FORMAT CSV, HEADER TRUE, DELIMITER '\t', QUOTE '', ESCAPE '', NULL '{NULL}', AUTO_DETECT FALSE)
     """)
 
