@@ -3,11 +3,15 @@ import numpy as np
 import json
 from tqdm import tqdm
 from collections import defaultdict
+import pandas as pd
 
 
 TEMP_TSV_PATH = "data_tmp/temp_data.tsv"
 BATCH_SIZE = 10 # rows
 NULL = '<NULL>'
+
+
+time_start = pd.Timestamp.now()
 
 
 def save_batch_to_db(con: duckdb.DuckDBPyConnection, batch: list[str]):
@@ -72,3 +76,6 @@ con.sql("SELECT * FROM tbl_molecular_vectors LIMIT 10").show()
 con.close()
 
 print("✅ Molecular profile vectorization completed and stored in DuckDB.")
+
+time_end = pd.Timestamp.now()
+print(f"Time taken: {time_end - time_start}")
