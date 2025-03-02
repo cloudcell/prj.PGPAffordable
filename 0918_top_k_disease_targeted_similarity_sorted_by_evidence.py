@@ -107,6 +107,8 @@ molecule_name = compound_matches.loc[compound_matches["ChEMBL_id"] == ref_chembl
 
 print(f"Using ChEMBL ID: {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name})")
 
+time_start = pd.Timestamp.now()
+
 # ---------------------- VECTOR RETRIEVAL ----------------------
 query = "SELECT * FROM tbl_vector_array"
 df = con.execute(query).fetchdf()
@@ -277,3 +279,7 @@ for row in results_top_k:
 
 # Close connection
 con.close()
+
+time_end = pd.Timestamp.now()
+print(f"\nExecution time: {time_end - time_start}")
+

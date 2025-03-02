@@ -1,10 +1,13 @@
 import os
 import subprocess
 import sys
+import pandas as pd
 
 # Define the prefix start and end
 PREFIX_SCRIPT_START = "0000"
 PREFIX_SCRIPT_END = "0800"  # "0130"
+
+time_start = pd.Timestamp.now()
 
 # Path to the virtual environment's Python
 VENV_PYTHON = sys.executable  # This ensures the current Python interpreter is used
@@ -29,3 +32,6 @@ for script in scripts_to_run:
     if returncode != 0:
         print(f"❌ Error in {script} (exit code {returncode})")
         break
+
+time_end = pd.Timestamp.now()
+print(f"Time taken: {time_end - time_start}")

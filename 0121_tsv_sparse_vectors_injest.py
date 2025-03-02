@@ -16,7 +16,8 @@ db_path = "bio_data.duck.db"
 con = duckdb.connect(db_path, read_only=False, config={'max_memory':'64GB'})
 
 # set memory limit
-# con.execute("PRAGMA memory_limit = 64GB")  # enable this in the future and test
+# con.execute("SET memory_limit = '10GB';")  # enable this in the future and test
+# con.execute("SET enable_progress_bar = true;")
 
 total = con.execute("SELECT count(*) FROM tbl_molecular_vectors").fetchone()[0]
 
