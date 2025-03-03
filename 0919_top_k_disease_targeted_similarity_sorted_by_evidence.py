@@ -124,7 +124,7 @@ total = con.execute("SELECT count(*) FROM tbl_vector_array").fetchone()[0]
 all_vectors = con.execute("SELECT * FROM tbl_vector_array")
 
 similarities = []
-for _ in tqdm(range(total)):
+for _ in tqdm(range(total), desc="Calculating similarities"):
     chembl_id, *vector = all_vectors.fetchone()
     vec = np.array(vector, dtype=np.float32) * mask  # Apply mask to each vector
     norm_product = vec_ref_norm * np.linalg.norm(vec)
@@ -149,7 +149,7 @@ phase_column = []
 status_column = []
 status_num_column = []
 known_drugs_aggregated_column = []
-for index, row in tqdm(df_results.iterrows(), total=len(df_results)):
+for index, row in tqdm(df_results.iterrows(), total=len(df_results), desc="Fetching ranking data"):
     chembl_id = row['ChEMBL ID']
     query = "SELECT COALESCE(name, 'N/A'), isApproved FROM tbl_substances WHERE chembl_id = ?"
     molecule_name, is_approved = con.execute(query, [chembl_id]).fetchone()
