@@ -7,6 +7,8 @@ from threading import Thread, Lock
 from tqdm import tqdm
 
 
+_has_errors = False # flag to interrupt process
+
 
 def _get_file_size(ftp, filename):
     """Returns the size of a file on the FTP server."""
@@ -100,8 +102,8 @@ def _download_file(ftp_host, ftp_dir, local_dir, filename, ftp_timeout, retry_li
             break  # Stop trying on unknown errors
 
     print(f"Failed to download after {retry_limit} attempts: {filename}")
-    with progress_lock:
-        progress_bar.update(1)  # Mark as "processed" to avoid blocking progress
+    global _has_errors
+    _has_errors = True
 
 
 def download_json_files(ftp_host: str, ftp_dir: str, local_dir: str, ftp_timeout = 30, retry_limit = 8, n_threads = 4):
@@ -128,7 +130,7 @@ def download_json_files(ftp_host: str, ftp_dir: str, local_dir: str, ftp_timeout
         # Multi-threaded download
         threads = []
         for i, filename in enumerate(json_files):
-            thread = Thread(target=_download_file, args=(ftp_host, ftp_dir, local_dir, filename, ftp_timeout, retry_limit, progress_bar, progress_lock))
+            thread = Thread(daemon=True, target=_download_file, args=(ftp_host, ftp_dir, local_dir, filename, ftp_timeout, retry_limit, progress_bar, progress_lock))
             threads.append(thread)
             thread.start()
 
@@ -136,6 +138,8 @@ def download_json_files(ftp_host: str, ftp_dir: str, local_dir: str, ftp_timeout
             if (i + 1) % n_threads == 0:
                 for t in threads:
                     t.join()
+                    if _has_errors:
+                        exit(1)
                 threads = []
 
         # Wait for remaining threads
