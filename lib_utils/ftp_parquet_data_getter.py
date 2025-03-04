@@ -10,22 +10,6 @@ from tqdm import tqdm
 _has_errors = False # flag to interrupt process
 
 
-def _is_dir(ftp: FTP, dir: str):
-    try:
-        ftp.cwd(dir)
-        return True
-    except:
-        return False
-
-def _get_file_size(ftp, filename):
-    """Returns the size of a file on the FTP server."""
-    try:
-        return ftp.size(filename)
-    except Exception as e:
-        print(f"Could not retrieve size for {filename}: {e}")
-        return None
-
-
 def _get_hash_of_file(path_to_file):
     with open(path_to_file, 'rb') as f:
         file_hash = md5(f.read()).hexdigest()
@@ -38,19 +22,28 @@ def _save_hash_of_file(path_to_file, path_to_hash):
         f.write(file_hash)
 
 
-def _download_file(ftp_host, ftp_dir, local_dir, filename, ftp_timeout, retry_limit, progress_bar, progress_lock):
+def _download_file(ftp_host, ftp_dir, local_dir, filename, remote_size, ftp_timeout, retry_limit, progress_bar, progress_lock):
     """Downloads a file, resuming if it's partially downloaded, and updates the tqdm progress bar."""
     os.makedirs(local_dir, exist_ok=True)
     local_path = os.path.join(local_dir, filename)
     path_to_hash = local_path + '.md5'
 
-    if os.path.exists(local_path) and os.path.exists(path_to_hash):
-        file_hash = _get_hash_of_file(local_path)
+    if os.path.exists(local_path):
+        if os.path.exists(path_to_hash):
+            file_hash = _get_hash_of_file(local_path)
 
-        with open(path_to_hash) as f:
-            saved_hash = f.read()
-        
-        if file_hash == saved_hash:
+            with open(path_to_hash) as f:
+                saved_hash = f.read()
+            
+            if file_hash == saved_hash:
+                print(f"Skipping (already complete): {filename}")
+                with progress_lock:
+                    progress_bar.update(1)
+                return
+
+        local_size = os.path.getsize(local_path)
+        if local_size == remote_size:
+            _save_hash_of_file(local_path, path_to_hash)
             print(f"Skipping (already complete): {filename}")
             with progress_lock:
                 progress_bar.update(1)
@@ -63,28 +56,14 @@ def _download_file(ftp_host, ftp_dir, local_dir, filename, ftp_timeout, retry_li
                 ftp.login()
                 ftp.cwd(ftp_dir)
 
-                # Get remote file size
-                remote_size = _get_file_size(ftp, filename)
-                if remote_size is None:
-                    print(f"Skipping {filename}: Could not determine file size.")
-                    return
-
                 # Check if the file already exists
                 if os.path.exists(local_path):
                     local_size = os.path.getsize(local_path)
-
-                    if local_size == remote_size:
-                        _save_hash_of_file(local_path, path_to_hash)
-                        print(f"Skipping (already complete): {filename}")
-                        with progress_lock:
-                            progress_bar.update(1)
-                        return
-                    elif local_size < remote_size:
+                    if local_size < remote_size:
                         print(f"Resuming {filename}: Local ({local_size} bytes) < Remote ({remote_size} bytes)")
                     else:
                         print(f"Warning: Local file {filename} is larger than the remote version. Overwriting.")
                         local_size = 0  # Start from scratch
-
                 else:
                     local_size = 0  # Start fresh
 
@@ -121,12 +100,18 @@ def download_parquet_files(ftp_host: str, ftp_dir: str, local_dir: str, ftp_time
     def get_files_recursively(ftp: FTP, dir: str):
         print(dir)
         ftp.cwd(dir)
+        ftp_list = []
+        ftp.retrlines('LIST', ftp_list.append)
+
         all_files = []
-        for name in ftp.nlst():
-            if _is_dir(ftp, os.path.join(dir, name)):
+        for line in ftp_list:
+            parts = line.split(maxsplit=8)  # Ensures filenames with spaces are preserved
+            name = parts[-1]
+            size = int(parts[4])
+            if line.startswith('d'):
                 all_files.extend(get_files_recursively(ftp, os.path.join(dir, name)))
             else:
-                all_files.append((dir, name))
+                all_files.append((dir, name, size))
         return all_files
 
     try:
@@ -147,8 +132,8 @@ def download_parquet_files(ftp_host: str, ftp_dir: str, local_dir: str, ftp_time
     with tqdm(total=len(parquet_files), desc="Downloading Files", unit="file") as progress_bar:
         # Multi-threaded download
         threads = []
-        for i, (dir, filename) in enumerate(parquet_files):
-            thread = Thread(daemon=True, target=_download_file, args=(ftp_host, dir, os.path.join(local_dir, dir.replace(ftp_dir, '', 1)), filename, ftp_timeout, retry_limit, progress_bar, progress_lock))
+        for i, (dir, filename, size) in enumerate(parquet_files):
+            thread = Thread(daemon=True, target=_download_file, args=(ftp_host, dir, os.path.join(local_dir, dir.replace(ftp_dir, '', 1)), filename, size, ftp_timeout, retry_limit, progress_bar, progress_lock))
             threads.append(thread)
             thread.start()
 
