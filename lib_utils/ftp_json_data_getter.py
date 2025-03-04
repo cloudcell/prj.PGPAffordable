@@ -34,7 +34,7 @@ def _download_file(ftp_host, ftp_dir, local_dir, filename, ftp_timeout, retry_li
     local_path = os.path.join(local_dir, filename)
     path_to_hash = local_path + '.md5'
 
-    if os.path.exists(path_to_hash):
+    if os.path.exists(local_path) and os.path.exists(path_to_hash):
         file_hash = _get_hash_of_file(local_path)
 
         with open(path_to_hash) as f:
