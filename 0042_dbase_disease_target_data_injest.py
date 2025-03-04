@@ -32,17 +32,6 @@ con.execute(
 disease_count = con.execute("SELECT COUNT(*) FROM tbl_diseases;").fetchone()[0]
 print(f"✅ tbl_diseases now contains {disease_count} rows.")
 
-# ✅ Ensure `tbl_targets` is populated before proceeding
-print("🔄 Populating tbl_targets from tbl_targets_tmp...")
-con.execute(
-    """
-    INSERT OR IGNORE INTO tbl_targets
-    SELECT * FROM tbl_targets_tmp;
-"""
-)
-target_count = con.execute("SELECT COUNT(*) FROM tbl_targets;").fetchone()[0]
-print(f"✅ tbl_targets now contains {target_count} rows.")
-
 # Load parquet files
 parquet_files_list = []
 for root, dirs, files in os.walk(DATA_DIR):
