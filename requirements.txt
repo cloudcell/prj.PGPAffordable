@@ -10,3 +10,5 @@ fastapi
 uvicorn
 parquet
 pyarrow
+requests
+
