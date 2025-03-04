@@ -163,5 +163,7 @@ def download_parquet_files(ftp_host: str, ftp_dir: str, local_dir: str, ftp_time
         # Wait for remaining threads
         for t in threads:
             t.join()
+            if _has_errors:
+                exit(1)
 
     print("Download completed.")
