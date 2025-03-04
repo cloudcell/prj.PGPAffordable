@@ -121,9 +121,14 @@ def download_parquet_files(ftp_host: str, ftp_dir: str, local_dir: str, ftp_time
     def get_files_recursively(ftp: FTP, dir: str):
         print(dir)
         ftp.cwd(dir)
+        ftp_list = []
+        ftp.retrlines('LIST', ftp_list.append)
+
         all_files = []
-        for name in ftp.nlst():
-            if _is_dir(ftp, os.path.join(dir, name)):
+        for line in ftp_list:
+            parts = line.split(maxsplit=8)  # Ensures filenames with spaces are preserved
+            name = parts[-1]
+            if line.startswith('d'):
                 all_files.extend(get_files_recursively(ftp, os.path.join(dir, name)))
             else:
                 all_files.append((dir, name))
