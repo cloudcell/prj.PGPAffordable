@@ -3,6 +3,12 @@ import subprocess
 import sys
 import pandas as pd
 
+# rename the database file to a database file with a suffix of the current date and time in iso format without ":"
+timestamp = pd.Timestamp.now().isoformat()
+# replace the ":" with ""
+timestamp = timestamp.replace(":", "-")
+os.rename("bio_data.duck.db", f"bio_data.{timestamp}.duck.db")
+
 # Define the prefix start and end
 PREFIX_SCRIPT_START = "0000"
 PREFIX_SCRIPT_END = "0800"  # "0130"
