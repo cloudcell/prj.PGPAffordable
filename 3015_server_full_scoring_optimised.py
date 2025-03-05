@@ -157,7 +157,8 @@ def get_disease_chembl_similarity(disease_id: str, chembl_id: str, top_k: int = 
         
         similarity = np.dot(vec_ref, vec) / (norm_product + 0) if norm_product > 0 else 0  # Avoid division by zero
         similarity = float(similarity)  # Convert to float for JSON serialization
-        
+        similarity = round(similarity, 6)
+
         if similarity > 0:
             similarities.append({"ChEMBL ID": other_chembl_id, "Similarity": similarity})
 
