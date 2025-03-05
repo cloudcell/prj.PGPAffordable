@@ -3,3 +3,4 @@ EFO_0009854     CHEMBL395091                    TRD/esketamine
 MONDO_0004739   CHEMBL2105745                   UCD/ravicti
 HP_0001370      CHEMBL521                       RA/ibuprofen
 MONDO_0005301   CHEMBL2108041                   MS/ocrelizumab
+MONDO_0018868   CHEMBL4802262                   metachromatic_leukodystrophy/atidarsagene_autotemcel
