@@ -18,11 +18,12 @@ def collect_md5_hashes(root_folder, output_file):
                             # hashsum, original_file = match.groups()
                             # strip .md5 extension
                             original_file = file[:-4]
-                            md5_data.append((original_file, content))
+                            md5_data.append((os.path.join(dirpath, original_file), content))
                             print(f"MD5 hash found for {original_file}: {content}")
                 except Exception as e:
                     print(f"Error reading {md5_path}: {e}")
     
+    md5_data.sort()
     with open(output_file, "w") as out_f:
         out_f.write("Filename\tHashsum\n")
         for filename, hashsum in md5_data:
