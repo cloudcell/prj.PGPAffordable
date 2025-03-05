@@ -19,7 +19,7 @@ if os.name == 'nt':  # Windows
     VENV_PYTHON = os.path.join(os.getcwd(), "venv", "Scripts", "python.exe")
 else:  # Linux/Mac
     VENV_PYTHON = os.path.join(os.getcwd(), "venv", "bin", "python")
-PYTHON_EXECUTABLE = VENV_PYTHON if os.path.exists(VENV_PYTHON) else "python"
+PYTHON_EXECUTABLE = VENV_PYTHON if os.path.exists(VENV_PYTHON) else "python3"
 
 # Ensure logs directory exists
 os.makedirs(LOGS_DIR, exist_ok=True)
@@ -104,7 +104,7 @@ for row in tqdm(text.split('\n')[1:]):
         logging.info(f'  {drug["ChEMBL ID"]} hash: {get_obj_hash(drug)}')
 
     result_hash = get_obj_hash(res_json)
-    logging.info(f'result_hash hash: {get_obj_hash(result_hash)}')
+    logging.info(f'result hash: {result_hash}')
 
     if hash_expected != result_hash:
         err = f'{disease_id} - {chembl_id}, hash_expected != result_hash: {hash_expected} != {result_hash}'
