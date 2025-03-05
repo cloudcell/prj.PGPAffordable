@@ -109,9 +109,12 @@ for row in tqdm([row for row in text.split('\n')[1:] if row.strip()]):
     logging.info(f'result hash: {result_hash}')
 
     if hash_expected != result_hash:
-        err = f'{disease_id} - {chembl_id}, hash_expected != result_hash: {hash_expected} != {result_hash}'
+        err = f'{disease_id} - {chembl_id}: hash_expected != result_hash: {hash_expected} != {result_hash}'
         logging.error(err)
         print(err)
+    else:
+        print(f'{disease_id} - {chembl_id}: OK ({hash_expected})')
+
 
 # Cleanup: Stop the server
 server_process.terminate()
