@@ -120,7 +120,7 @@ def download_parquet_files(ftp_host: str, ftp_dir: str, local_dir: str, ftp_time
             all_files = get_files_recursively(ftp, ftp_dir)
     except (socket.timeout, error_temp, error_perm, error_proto, error_reply) as e:
         print(f"Failed to list files: {e}")
-        return
+        exit(1)
 
     parquet_files = [f for f in all_files if f[1].endswith(".parquet")]
     print(f"Found {len(parquet_files)} .parquet files. Downloading...")

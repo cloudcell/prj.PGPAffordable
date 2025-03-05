@@ -117,7 +117,7 @@ def download_json_files(ftp_host: str, ftp_dir: str, local_dir: str, ftp_timeout
             files = ftp.nlst()
     except (socket.timeout, error_temp, error_perm, error_proto, error_reply) as e:
         print(f"Failed to list files: {e}")
-        return
+        exit(1)
 
     json_files = [f for f in files if f.endswith(".json")]
     print(f"Found {len(json_files)} JSON files. Downloading...")
