@@ -23,7 +23,7 @@ def get_obj_hash(obj):
     return md5(json.dumps(obj, sort_keys=True).encode('utf-8')).hexdigest()
 
 
-with open('tests/test_batch_001.txt') as f:
+with open('tests/test_batch_002_AB.txt') as f:
     text = f.read()
 
 for row in tqdm(text.split('\n')[1:]):
