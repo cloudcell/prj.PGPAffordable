@@ -109,11 +109,11 @@ for row in tqdm([row for row in text.split('\n')[1:] if row.strip()]):
     logging.info(f'result hash: {result_hash}')
 
     if hash_expected != result_hash:
-        err = f'/nFAIL: expected: {hash_expected} actual: {result_hash} for {disease_id} - {chembl_id}'
+        err = f'\nFAIL: expected: {hash_expected} actual: {result_hash} for {disease_id} - {chembl_id}'
         logging.error(err)
         print(err)
     else:
-        print(f'/nPASS: expected: {hash_expected} actual: {result_hash} for {disease_id} - {chembl_id}')
+        print(f'\nPASS: expected: {hash_expected} actual: {result_hash} for {disease_id} - {chembl_id}')
 
 
 # Cleanup: Stop the server
