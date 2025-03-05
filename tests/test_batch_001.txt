@@ -1,4 +1,4 @@
-disease_id      chembl_id       hash_expected   comment
+disease_id      chembl_id       hash_expected   description
 EFO_0009854     CHEMBL395091                    TRD/esketamine
 MONDO_0004739   CHEMBL2105745                   UCD/ravicti
 HP_0001370      CHEMBL521                       RA/ibuprofen
