@@ -1,0 +1,6 @@
+disease_id      chembl_id       hash_expected                     description
+EFO_0009854     CHEMBL395091    757ee9706b89664fe8adb7b0da08c4da  TRD/esketamine
+MONDO_0004739   CHEMBL2105745   ed5059698bae96495fad3c00591af6d7  UCD/ravicti
+HP_0001370      CHEMBL521       9de823c2218ed3ee54e610925aa276ba  RA/ibuprofen
+MONDO_0005301   CHEMBL2108041   24caf68f2e35e961d3555a00524fed7d  MS/ocrelizumab
+MONDO_0018868   CHEMBL4802262   2630b0e8e41226650045f8687cadda6c  metachromatic_leukodystrophy/atidarsagene_autotemcel
