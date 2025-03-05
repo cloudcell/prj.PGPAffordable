@@ -83,7 +83,7 @@ def get_obj_hash(obj):
 with open('tests/test_batch_002_AB.txt') as f:
     text = f.read()
 
-for row in tqdm(text.split('\n')[1:]):
+for row in tqdm([row for row in text.split('\n')[1:] if row.strip()]):
     if not row:
         continue
     disease_id, chembl_id, hash_expected, description = row.strip().split()
