@@ -9,6 +9,8 @@ import json
 import requests
 from tqdm import tqdm
 
+REFERENCE_HASH_FILE = 'tests/test_batch_003_AB.txt'
+
 BASE_URL = 'http://127.0.0.1:7334'
 LOGS_DIR = "logs"
 SERVER_SCRIPT = "3015_server_full_scoring_optimised.py"  # Update with the actual filename
@@ -80,7 +82,7 @@ if not wait_for_server():
 def get_obj_hash(obj):
     return md5(json.dumps(obj, sort_keys=True).encode('utf-8')).hexdigest()
 
-with open('tests/test_batch_002_AB.txt') as f:
+with open(REFERENCE_HASH_FILE) as f:
     text = f.read()
 
 for row in tqdm([row for row in text.split('\n')[1:] if row.strip()]):
