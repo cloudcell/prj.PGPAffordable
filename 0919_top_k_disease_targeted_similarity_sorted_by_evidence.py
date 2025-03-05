@@ -130,6 +130,8 @@ for _ in tqdm(range(total), desc="Calculating similarities"):
     norm_product = vec_ref_norm * np.linalg.norm(vec)
     
     similarity = np.dot(vec_ref, vec) / (norm_product + 0) if norm_product > 0 else 0  # Avoid division by zero
+
+    similarity = round(similarity, 6)
     
     if similarity > 0:
         similarities.append((chembl_id, similarity))
@@ -198,7 +200,7 @@ results = df_results[df_results['isApproved'] | df_results['isUrlAvailable']]
 # convert to list of dictionares
 results = results.to_dict('records')
 
-results.sort(key=lambda x: [x['Similarity'], x['isApproved'], x['isUrlAvailable'], x['phase'], x['status_num']], reverse=True)
+results.sort(key=lambda x: [x['Similarity'], x['isApproved'], x['isUrlAvailable'], x['phase'], x['status_num'], x['ChEMBL ID']], reverse=True)
 
 # Display top-k results based on the top 10-th cosine similarity
 if len(results) > TOP_K - 1:
@@ -214,12 +216,12 @@ results_top_k.insert(0, reference_drug)
 
 # Print header
 print(f"\nTop {TOP_K} Primary Similarity Results for {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name}):\n")
-print(f"{'ChEMBL ID':<15} {'Molecule Name':<30} {'Similarity':<20} {'isApproved':<12} {'isUrlAvailable':<15} {'phase':<7} {'status_num':<12} {'status':<24} {'fld_knownDrugsAggregated'}")
+print(f"{'ChEMBL ID':<15} {'Molecule Name':<30} {'Similarity':<12} {'isApproved':<12} {'isUrlAvailable':<15} {'phase':<7} {'status_num':<12} {'status':<24} {'fld_knownDrugsAggregated'}")
 print("-" * 150)
 
 # Print each row explicitly to ensure all lines are visible without sorting
 for row in results_top_k:
-    print(f"{row['ChEMBL ID']:<15} {row['Molecule Name']:<30} {row['Similarity']:<20.10f} {row['isApproved']:<12} {row['isUrlAvailable']:<15} {row['phase']:<7.1f} {row['status_num']:<12} {row['status']:<24} {str(row['fld_knownDrugsAggregated'])[:JSON_CHARS_TO_DISPLAY]}")
+    print(f"{row['ChEMBL ID']:<15} {row['Molecule Name']:<30} {row['Similarity']:<12.6f} {row['isApproved']:<12} {row['isUrlAvailable']:<15} {row['phase']:<7.1f} {row['status_num']:<12} {row['status']:<24} {str(row['fld_knownDrugsAggregated'])[:JSON_CHARS_TO_DISPLAY]}")
 
 # Close connection
 con.close()
@@ -231,7 +233,7 @@ results = df_results[(df_results['isApproved'] != 1) & (df_results['isUrlAvailab
 # convert to list of dictionares
 results = results.to_dict('records')
 
-results.sort(key=lambda x: [x['Similarity'], x['isApproved'], x['isUrlAvailable'], x['phase'], x['status_num']], reverse=True)
+results.sort(key=lambda x: [x['Similarity'], x['isApproved'], x['isUrlAvailable'], x['phase'], x['status_num'], x['ChEMBL ID']], reverse=True)
 
 # Display top-k results based on the top 10-th cosine similarity
 if len(results) > TOP_K - 1:
@@ -247,12 +249,12 @@ results_top_k.insert(0, reference_drug)
 
 # Print header
 print(f"\nTop {TOP_K} Secondary Similarity Results for {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name}):\n")
-print(f"{'ChEMBL ID':<15} {'Molecule Name':<30} {'Similarity':<20} {'isApproved':<12} {'isUrlAvailable':<15} {'phase':<7} {'status_num':<12} {'status':<24} {'fld_knownDrugsAggregated'}")
+print(f"{'ChEMBL ID':<15} {'Molecule Name':<30} {'Similarity':<12} {'isApproved':<12} {'isUrlAvailable':<15} {'phase':<7} {'status_num':<12} {'status':<24} {'fld_knownDrugsAggregated'}")
 print("-" * 150)
 
 # Print each row explicitly to ensure all lines are visible without sorting
 for row in results_top_k:
-    print(f"{row['ChEMBL ID']:<15} {row['Molecule Name']:<30} {row['Similarity']:<20.10f} {row['isApproved']:<12} {row['isUrlAvailable']:<15} {row['phase']:<7.1f} {row['status_num']:<12} {row['status']:<24} {str(row['fld_knownDrugsAggregated'])[:JSON_CHARS_TO_DISPLAY]}")
+    print(f"{row['ChEMBL ID']:<15} {row['Molecule Name']:<30} {row['Similarity']:<12.6f} {row['isApproved']:<12} {row['isUrlAvailable']:<15} {row['phase']:<7.1f} {row['status_num']:<12} {row['status']:<24} {str(row['fld_knownDrugsAggregated'])[:JSON_CHARS_TO_DISPLAY]}")
 
 # Close connection
 con.close()
