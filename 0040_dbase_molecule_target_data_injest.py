@@ -15,8 +15,8 @@ con = duckdb.connect(db_path)
 print("🔄 Populating tbl_substances from tbl_molecules...")
 con.execute(
     """
-    INSERT OR IGNORE INTO tbl_molecules
-    SELECT * FROM tbl_substances;
+    INSERT OR IGNORE INTO tbl_substances
+    SELECT * FROM tbl_molecules;
 """
 )
 count = con.execute("SELECT COUNT(*) FROM tbl_substances;").fetchone()[0]
