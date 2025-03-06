@@ -94,28 +94,28 @@ for filename in os.listdir(DATA_DIR):
 with open(TEMP_TSV_PATH, 'w', encoding='utf-8') as f:
     f.write('\n'.join('\t'.join(map(str, row)) for row in data_list))
 
-con.execute('DROP TABLE IF EXISTS tbl_knownDrugsAggregated')
-con.execute("""
-CREATE TABLE IF NOT EXISTS tbl_knownDrugsAggregated (
-    drugId STRING,
-    targetId STRING,
-    diseaseId STRING,
-    phase FLOAT,
-    status STRING,
-    urls STRING,
-    ancestors STRING[],
-    label STRING,
-    approvedSymbol STRING,
-    approvedName STRING,
-    targetClass STRING[],
-    prefName STRING,
-    tradeNames STRING[],
-    synonyms STRING[],
-    drugType STRING,
-    mechanismOfAction STRING,
-    targetName STRING
-);
-""")
+# con.execute('DROP TABLE IF EXISTS tbl_knownDrugsAggregated')
+# con.execute("""
+# CREATE TABLE IF NOT EXISTS tbl_knownDrugsAggregated (
+#     drugId STRING,
+#     targetId STRING,
+#     diseaseId STRING,
+#     phase FLOAT,
+#     status STRING,
+#     urls STRING,
+#     ancestors STRING[],
+#     label STRING,
+#     approvedSymbol STRING,
+#     approvedName STRING,
+#     targetClass STRING[],
+#     prefName STRING,
+#     tradeNames STRING[],
+#     synonyms STRING[],
+#     drugType STRING,
+#     mechanismOfAction STRING,
+#     targetName STRING
+# );
+# """)
 
 # Copy data into DuckDB with strict mode disabled
 con.execute(f"""
