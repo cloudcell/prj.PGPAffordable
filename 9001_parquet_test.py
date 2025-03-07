@@ -11,7 +11,7 @@ import pandas as pd
 # con = duckdb.connect(db_path)
 
 # read the whole file
-df = pd.read_parquet("data/202409XX/tmp/part-00000-ea349457-2934-4038-96c6-83470290a1ec.c000.snappy.parquet")
+df = pd.read_parquet("data/202409XX/tmp/part-00200-ea349457-2934-4038-96c6-83470290a1ec.c000.snappy.parquet")
 
 # print the first 5 rows showing all columns using two for loops, one for record and one for column, with column names first
 for i in range(1):
