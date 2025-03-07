@@ -49,7 +49,7 @@ with open(TEMP_TSV_PATH, "r", encoding='utf-8') as f:
     batch = [header]
     for line in tqdm(f, total=total):
         batch.append(line)
-        if len(batch) == BATCH_SIZE:
+        if len(batch) == BATCH_SIZE + 1:
             save_batch_to_db(con, batch)
             batch = [header]
     if len(batch) > 1:
