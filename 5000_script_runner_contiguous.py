@@ -7,7 +7,10 @@ import pandas as pd
 timestamp = pd.Timestamp.now().isoformat()
 # replace the ":" with ""
 timestamp = timestamp.replace(":", "-")
-os.rename("bio_data.duck.db", f"bio_data.{timestamp}.duck.db")
+
+# if exists
+if os.path.exists("bio_data.duck.db"):
+    os.rename("bio_data.duck.db", f"bio_data.{timestamp}.duck.db")
 
 # Define the prefix start and end
 PREFIX_SCRIPT_START = "0000"
