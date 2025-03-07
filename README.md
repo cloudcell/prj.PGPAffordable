@@ -11,10 +11,10 @@ pip install -r requirements.txt
 python 5000_script_runner_contiguous.py
 
 # 4. to run the test
-python 0918_top_k_disease_targeted_similarity_sorted_by_evidence.py
+python 0919_top_k_disease_targeted_similarity_sorted_by_evidence.py
 
 # 5. to run the server
-python 3014_server_full_scoring.py
+python 3015_server_full_scoring.py
 ```
 
 
