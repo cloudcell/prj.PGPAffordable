@@ -50,7 +50,7 @@ gc.collect()
 
 with open(TEMP_TSV_PATH, 'w', encoding='utf-8') as f:
     f.write('\t'.join(map(str, header)) + '\n')
-    for i1 in tqdm(range(int(len(data_tuples) / BATCH_SIZE)), desc="Writing to TSV"):
+    for i1 in tqdm(range(int(len(data_tuples) / BATCH_SIZE) + 1), desc="Writing to TSV"):
         i1 *= BATCH_SIZE
         i2 = i1 + BATCH_SIZE
         f.write('\n'.join('\t'.join(map(str, row)) for row in data_tuples[i1:i2]) + '\n')
