@@ -78,6 +78,8 @@ server_process = start_server()
 if not wait_for_server():
     logging.error("Server did not start. Exiting.")
     exit(1)
+else:
+    logging.info("Server started successfully.")
 
 def get_obj_hash(obj):
     return md5(json.dumps(obj, sort_keys=True).encode('utf-8')).hexdigest()
