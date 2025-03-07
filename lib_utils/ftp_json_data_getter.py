@@ -106,7 +106,7 @@ def _download_file(ftp_host, ftp_dir, local_dir, filename, ftp_timeout, retry_li
     _has_errors = True
 
 
-def download_json_files(ftp_host: str, ftp_dir: str, local_dir: str, ftp_timeout = 30, retry_limit = 8, n_threads = 4):
+def download_json_files(ftp_host: str, ftp_dir: str, local_dir: str, ftp_timeout = 30, retry_limit = 10, n_threads = 4):
     """Lists all JSON files and downloads them using multiple threads with resume support and progress bar."""
     os.makedirs(local_dir, exist_ok=True)
 
