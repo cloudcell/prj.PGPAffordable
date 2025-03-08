@@ -215,13 +215,29 @@ else:
 results_top_k.insert(0, reference_drug)
 
 # Print header
-print(f"\nTop {TOP_K} Primary Similarity Results for {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name}):\n")
+print(f"\nTop {TOP_K}+ Primary Similarity Results for {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name}):\n")
 print(f"{'ChEMBL ID':<15} {'Molecule Name':<30} {'Similarity':<12} {'isApproved':<12} {'isUrlAvailable':<15} {'phase':<7} {'status_num':<12} {'status':<24} {'fld_knownDrugsAggregated'}")
 print("-" * 150)
 
+# # Print each row explicitly to ensure all lines are visible without sorting
+# for row in results_top_k:
+#     print(f"{row['ChEMBL ID']:<15} {row['Molecule Name']:<30} {row['Similarity']:<12.6f} {row['isApproved']:<12} {row['isUrlAvailable']:<15} {row['phase']:<7.1f} {row['status_num']:<12} {row['status']:<24} {str(row['fld_knownDrugsAggregated'])[:JSON_CHARS_TO_DISPLAY]}")
+
 # Print each row explicitly to ensure all lines are visible without sorting
-for row in results_top_k:
-    print(f"{row['ChEMBL ID']:<15} {row['Molecule Name']:<30} {row['Similarity']:<12.6f} {row['isApproved']:<12} {row['isUrlAvailable']:<15} {row['phase']:<7.1f} {row['status_num']:<12} {row['status']:<24} {str(row['fld_knownDrugsAggregated'])[:JSON_CHARS_TO_DISPLAY]}")
+for i, row in enumerate(results_top_k, start=1):
+    print(
+        f"{i:<4}"  # line number, left-justified in a field of width 4
+        f"{row['ChEMBL ID']:<15}"
+        f"{row['Molecule Name']:<30}"
+        f"{row['Similarity']:<12.6f}"
+        f"{row['isApproved']:<12}"
+        f"{row['isUrlAvailable']:<15}"
+        f"{row['phase']:<7.1f}"
+        f"{row['status_num']:<12}"
+        f"{row['status']:<24}"
+        f"{str(row['fld_knownDrugsAggregated'])[:JSON_CHARS_TO_DISPLAY]}"
+    )
+
 
 # Close connection
 con.close()
@@ -248,13 +264,29 @@ else:
 results_top_k.insert(0, reference_drug)
 
 # Print header
-print(f"\nTop {TOP_K} Secondary Similarity Results for {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name}):\n")
+print(f"\nTop {TOP_K}+ Secondary Similarity Results for {ref_chembl_id} (Trade Name: {trade_name}, Name: {molecule_name}):\n")
 print(f"{'ChEMBL ID':<15} {'Molecule Name':<30} {'Similarity':<12} {'isApproved':<12} {'isUrlAvailable':<15} {'phase':<7} {'status_num':<12} {'status':<24} {'fld_knownDrugsAggregated'}")
 print("-" * 150)
 
 # Print each row explicitly to ensure all lines are visible without sorting
-for row in results_top_k:
-    print(f"{row['ChEMBL ID']:<15} {row['Molecule Name']:<30} {row['Similarity']:<12.6f} {row['isApproved']:<12} {row['isUrlAvailable']:<15} {row['phase']:<7.1f} {row['status_num']:<12} {row['status']:<24} {str(row['fld_knownDrugsAggregated'])[:JSON_CHARS_TO_DISPLAY]}")
+# for row in results_top_k:
+#     print(f"{row['ChEMBL ID']:<15} {row['Molecule Name']:<30} {row['Similarity']:<12.6f} {row['isApproved']:<12} {row['isUrlAvailable']:<15} {row['phase']:<7.1f} {row['status_num']:<12} {row['status']:<24} {str(row['fld_knownDrugsAggregated'])[:JSON_CHARS_TO_DISPLAY]}")
+
+# Print each row explicitly to ensure all lines are visible without sorting
+for i, row in enumerate(results_top_k, start=1):
+    print(
+        f"{i:<4}"  # line number, left-justified in a field of width 4
+        f"{row['ChEMBL ID']:<15}"
+        f"{row['Molecule Name']:<30}"
+        f"{row['Similarity']:<12.6f}"
+        f"{row['isApproved']:<12}"
+        f"{row['isUrlAvailable']:<15}"
+        f"{row['phase']:<7.1f}"
+        f"{row['status_num']:<12}"
+        f"{row['status']:<24}"
+        f"{str(row['fld_knownDrugsAggregated'])[:JSON_CHARS_TO_DISPLAY]}"
+    )
+
 
 # Close connection
 con.close()
