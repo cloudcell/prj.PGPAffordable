@@ -123,7 +123,7 @@ def download_parquet_files(ftp_host: str, ftp_dir: str, local_dir: str, checksum
         # Multi-threaded download
         threads = []
         for i, (dir, filename, size) in enumerate(parquet_files):
-            saved_hash = checksum_dict[os.path.join(dir, filename).split('/output/etl/', maxsplit=1)[-1]]
+            saved_hash = checksum_dict[os.path.join(dir, filename).split('/output/etl/', maxsplit=1)[-1].replace('\\', '/')]
 
             thread = Thread(daemon=True, target=_download_file, args=(ftp_host, dir, os.path.join(local_dir, dir.replace(ftp_dir, '', 1)), filename, saved_hash, size, ftp_timeout, retry_limit, progress_bar, progress_lock))
             threads.append(thread)
