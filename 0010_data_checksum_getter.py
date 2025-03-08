@@ -31,6 +31,23 @@ def calculate_sha1(file_path):
             sha1.update(chunk)
     return sha1.hexdigest()
 
+# check if the file exists and do not download it again unless the checksum is different
+if os.path.exists(LOCAL_FILE):
+    # Calculate actual SHA-1 checksum
+    actual_checksum = calculate_sha1(LOCAL_FILE)
+    # Read expected checksum from file
+    with open(LOCAL_CHECKSUM_FILE, "r") as f:
+        expected_checksum = f.read().strip().split()[0]  # Extract checksum value
+    # Verify checksum
+    if actual_checksum == expected_checksum:
+        print("✅ Checksum verification successful: File is intact.")
+        exit(0)
+    else:
+        print("❌ Checksum mismatch: File may be corrupted.")
+        os.remove(LOCAL_FILE)
+        os.remove(LOCAL_CHECKSUM_FILE)
+        
+
 # Connect to FTP server
 ftp = ftplib.FTP(FTP_SERVER)
 ftp.login()
