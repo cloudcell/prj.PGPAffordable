@@ -200,6 +200,11 @@ import sys
 import pandas as pd
 import threading
 
+
+# Ensure UTF-8 encoding
+os.environ["PYTHONIOENCODING"] = "utf-8"
+
+
 timestamp = pd.Timestamp.now().isoformat().replace(":", "-")
 
 if os.path.exists("bio_data.duck.db"):

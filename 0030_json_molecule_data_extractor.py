@@ -85,12 +85,12 @@ for filename in os.listdir(DATA_DIR):
                         record.get("maximumClinicalTrialPhase", NULL),
                         record.get("hasBeenWithdrawn", NULL),
                         record.get("isApproved", NULL),
-                        json.dumps(record.get("tradeNames", [])),  # Store as JSON string
-                        json.dumps(record.get("synonyms", [])),  # Store as JSON string
-                        json.dumps(record.get("crossReferences", {})),  # Store as JSON string
-                        json.dumps(record.get("childChemblIds", [])),  # Store as JSON string
-                        json.dumps(record.get("linkedDiseases", {}).get("rows", [])),  # Store as JSON string
-                        json.dumps(record.get("linkedTargets", {}).get("rows", [])),  # Store as JSON string
+                        json.dumps(record.get("tradeNames", []), sort_keys=True),  # Store as JSON string
+                        json.dumps(record.get("synonyms", []), sort_keys=True),  # Store as JSON string
+                        json.dumps(record.get("crossReferences", {}), sort_keys=True),  # Store as JSON string
+                        json.dumps(record.get("childChemblIds", []), sort_keys=True),  # Store as JSON string
+                        json.dumps(record.get("linkedDiseases", {}).get("rows", []), sort_keys=True),  # Store as JSON string
+                        json.dumps(record.get("linkedTargets", {}).get("rows", []), sort_keys=True),  # Store as JSON string
                         record.get("description", NULL),
                     ])
 

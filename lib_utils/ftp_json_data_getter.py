@@ -129,7 +129,7 @@ def download_json_files(ftp_host: str, ftp_dir: str, local_dir: str, checksum_fi
         # Multi-threaded download
         threads = []
         for i, filename in enumerate(json_files):
-            saved_hash = checksum_dict[os.path.join(ftp_dir, filename).split('/output/etl/', maxsplit=1)[-1]]
+            saved_hash = checksum_dict[os.path.join(ftp_dir, filename).split('/output/etl/', maxsplit=1)[-1].replace('\\', '/')]
 
             thread = Thread(daemon=True, target=_download_file, args=(ftp_host, ftp_dir, local_dir, filename, saved_hash, ftp_timeout, retry_limit, progress_bar, progress_lock))
             threads.append(thread)
