@@ -5,3 +5,4 @@ HP_0001370      CHEMBL521       12427eb1093e802366f64b3adf971e6b  RA/ibuprofen
 MONDO_0005301   CHEMBL2108041   3cc4671ef822c9ed90f6f253517776b9  MS/ocrelizumab
 MONDO_0018868   CHEMBL4802262   0bd1cba181ff8e42676ed0d79e11253e  metachromatic_leukodystrophy/atidarsagene_autotemcel
 MONDO_0009656   CHEMBL32        00000000000000000000000000000000  lysosomal_storage_disorder/moxifloxacin
+MONDO_0009656   CHEMBL1200735   00000000000000000000000000000000  lysosomal_storage_disorder/moxifloxacin_hydrochloryde
