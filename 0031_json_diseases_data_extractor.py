@@ -67,16 +67,16 @@ for filename in os.listdir(DATA_DIR):
                 data_list.append([
                     record["id"],
                     record.get("code", NULL),
-                    json.dumps(record.get("dbXRefs", [])),
+                    json.dumps(record.get("dbXRefs", []), sort_keys=True),
                     record.get("name", NULL),
                     record.get("description", NULL),
-                    json.dumps(record.get("parents", [])),
-                    json.dumps(record.get("synonyms", {})),
-                    json.dumps(record.get("ancestors", [])),
-                    json.dumps(record.get("descendants", [])),
-                    json.dumps(record.get("children", [])),
-                    json.dumps(record.get("therapeuticAreas", [])),
-                    json.dumps(record.get("ontology", {})),
+                    json.dumps(record.get("parents", []), sort_keys=True),
+                    json.dumps(record.get("synonyms", {}), sort_keys=True),
+                    json.dumps(record.get("ancestors", []), sort_keys=True),
+                    json.dumps(record.get("descendants", []), sort_keys=True),
+                    json.dumps(record.get("children", []), sort_keys=True),
+                    json.dumps(record.get("therapeuticAreas", []), sort_keys=True),
+                    json.dumps(record.get("ontology", {}), sort_keys=True),
                 ])
 
         except Exception as e:
