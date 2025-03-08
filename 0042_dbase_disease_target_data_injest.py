@@ -81,7 +81,7 @@ from tqdm import tqdm
 DATA_DIR = "data/202409XX/evidence"
 LOGS_DIR = "logs"
 DB_PATH = "bio_data.duck.db"
-BATCH_SIZE = 5_000  # Optimized batch size for memory efficiency
+BATCH_SIZE = 50_000  # Optimized batch size for memory efficiency
 
 # Ensure log directory exists
 os.makedirs(LOGS_DIR, exist_ok=True)
