@@ -25,11 +25,14 @@ def collect_sha1_hashes(root_folder, output_file):
                 except Exception as e:
                     print(f"Error reading {md5_path}: {e}")
     
-    hash_data.sort()
+    # hash_data.sort()
+    # sort by filename
+    hash_data.sort(key=lambda x: x[0])
+    
     with open(output_file, "w") as out_f:
-        out_f.write("Filename\tHashsum\n")
+        # out_f.write("Hashsum\tFilename\n")
         for filename, hashsum in hash_data:
-            out_f.write(f"{filename}\t{hashsum}\n")
+            out_f.write(f"{hashsum}\t{filename}\n")
     
     print(f"SHA1 hashes collected and saved to {output_file}")
 
