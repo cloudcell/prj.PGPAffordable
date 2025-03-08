@@ -76,7 +76,7 @@ con = duckdb.connect(db_path)
 
 # Fetch all unique target IDs
 targets_query = "SELECT DISTINCT target_id FROM tbl_actions"
-target_ids = [row[0] for row in con.execute(targets_query).fetchall()]
+target_ids = sorted([row[0] for row in con.execute(targets_query).fetchall()])
 
 # Get total count of ChEMBL_ids for tqdm progress bar
 total_query = "SELECT COUNT(*) FROM tbl_molecular_vectors"
