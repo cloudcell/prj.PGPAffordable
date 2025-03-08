@@ -9,7 +9,8 @@ import json
 import requests
 from tqdm import tqdm
 
-REFERENCE_HASH_FILE = 'tests/test_batch_003_AB.txt'
+# REFERENCE_HASH_FILE = 'tests/test_batch_003_AB.txt'
+REFERENCE_HASH_FILE = 'tests/test_batch_004_IY.txt'
 
 BASE_URL = 'http://127.0.0.1:7334'
 LOGS_DIR = "logs"
