@@ -1,4 +1,4 @@
-from hashlib import md5
+from hashlib import md5, sha1
 from ftplib import FTP, error_temp, error_perm, error_proto, error_reply
 import os
 import socket
@@ -12,7 +12,8 @@ _has_errors = False # flag to interrupt process
 
 def _get_hash_of_file(path_to_file):
     with open(path_to_file, 'rb') as f:
-        file_hash = md5(f.read()).hexdigest()
+        # file_hash = md5(f.read()).hexdigest()
+        file_hash = sha1(f.read()).hexdigest()
     return file_hash
 
 
@@ -26,7 +27,8 @@ def _download_file(ftp_host, ftp_dir, local_dir, filename, remote_size, ftp_time
     """Downloads a file, resuming if it's partially downloaded, and updates the tqdm progress bar."""
     os.makedirs(local_dir, exist_ok=True)
     local_path = os.path.join(local_dir, filename)
-    path_to_hash = local_path + '.md5'
+    # path_to_hash = local_path + '.md5'
+    path_to_hash = local_path + '.sha1'
 
     if os.path.exists(local_path):
         if os.path.exists(path_to_hash):
