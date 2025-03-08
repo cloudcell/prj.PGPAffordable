@@ -94,7 +94,8 @@ def _download_file(ftp_host, ftp_dir, local_dir, filename, ftp_timeout, retry_li
                 with progress_lock:
                     progress_bar.update(1)
                 return  # Success, exit loop
-
+        
+        # FIXME: retry on error 'Connection reset by peer'
         except (socket.timeout, error_temp, error_perm, error_proto, error_reply) as e:
             retries += 1
             print(f"Retry {retries}/{retry_limit} for {filename}: {e}")
