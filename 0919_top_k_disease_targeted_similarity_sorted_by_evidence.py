@@ -131,7 +131,7 @@ for _ in tqdm(range(total), desc="Calculating similarities"):
     
     similarity = np.dot(vec_ref, vec) / (norm_product + 0) if norm_product > 0 else 0  # Avoid division by zero
 
-    similarity = round(similarity, 6)
+    similarity = round(similarity, 9)  # 6 produces too many similar results using the indirect algorithm
     
     if similarity > 0:
         similarities.append((chembl_id, similarity))
@@ -201,6 +201,12 @@ results = df_results[df_results['isApproved'] | df_results['isUrlAvailable']]
 results = results.to_dict('records')
 
 results.sort(key=lambda x: [x['Similarity'], x['isApproved'], x['isUrlAvailable'], x['phase'], x['status_num'], x['ChEMBL ID']], reverse=True)
+
+# Query Summary for disease_id and chembl_id
+print("-" * 80)
+print(f"Disease ID: {disease_id}")
+print(f"ChEMBL ID: {ref_chembl_id}")
+print("-" * 80)
 
 # Display top-k results based on the top 10-th cosine similarity
 if len(results) > TOP_K - 1:
