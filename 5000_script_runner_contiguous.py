@@ -67,6 +67,8 @@ for script in scripts_to_run:
 
     end_subscript_time = pd.Timestamp.now()
     log_message(f"=== Ended {script} at {end_subscript_time} ===")
+    elapsed_time = end_subscript_time - start_subscript_time
+    log_message(f"Time taken for {script}: {elapsed_time}")
 
     if returncode != 0:
         log_message(f"❌ Error in {script} (exit code {returncode}) — stopping runner.")
