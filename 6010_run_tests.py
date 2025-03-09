@@ -10,7 +10,7 @@ import requests
 from tqdm import tqdm
 
 # REFERENCE_HASH_FILE = 'tests/test_batch_003_AB.txt'
-REFERENCE_HASH_FILE = 'tests/test_batch_004_IY.txt'
+REFERENCE_HASH_FILE = 'tests/test_batch_005_AB.txt'
 
 BASE_URL = 'http://127.0.0.1:7334'
 LOGS_DIR = "logs"
@@ -27,7 +27,7 @@ PYTHON_EXECUTABLE = VENV_PYTHON if os.path.exists(VENV_PYTHON) else "python3"
 # Ensure logs directory exists
 os.makedirs(LOGS_DIR, exist_ok=True)
 logging.basicConfig(
-    filename=os.path.join(LOGS_DIR, dt.datetime.now().isoformat().replace(":", "-") + ".log"),
+    filename=os.path.join(LOGS_DIR, "test_" + dt.datetime.now().isoformat().replace(":", "-") + ".log"),
     format="%(levelname)s: %(message)s",
     level=logging.DEBUG,
 )
@@ -116,7 +116,10 @@ for row in tqdm([row for row in text.split('\n')[1:] if row.strip()]):
         logging.error(err)
         print(err)
     else:
-        print(f'\n✅ PASS: expected: {hash_expected} actual: {result_hash} for {disease_id} - {chembl_id}')
+        inf = f'\n✅ PASS: expected: {hash_expected} actual: {result_hash} for {disease_id} - {chembl_id}'
+        logging.info(inf)
+        print(inf)
+        
 
 
 # Cleanup: Stop the server
