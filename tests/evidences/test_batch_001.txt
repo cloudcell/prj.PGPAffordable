@@ -1,0 +1,2 @@
+disease_id      reference_drug_id   replacement_drug_id   hash_expected                     description
+EFO_0009854     CHEMBL395091        CHEMBL742             85642483cf67e33312fd1137ad3448f2  TRD/esketamine/ketamine

@@ -10,7 +10,10 @@ import requests
 from tqdm import tqdm
 
 # REFERENCE_HASH_FILE = 'tests/test_batch_003_AB.txt'
-REFERENCE_HASH_FILE = 'tests/test_batch_005_AB.txt'
+REFERENCE_HASH_FILES = {
+    'disease_chembl_similarity': 'tests/disease_chembl_similarity/test_batch_005_AB.txt',
+    'evidences': 'tests/evidences/test_batch_001.txt',
+    }
 
 BASE_URL = 'http://127.0.0.1:7334'
 LOGS_DIR = "logs"
@@ -85,8 +88,12 @@ else:
 def get_obj_hash(obj):
     return md5(json.dumps(obj, sort_keys=True).encode('utf-8')).hexdigest()
 
-with open(REFERENCE_HASH_FILE) as f:
+
+# test GET /disease_chembl_similarity
+with open(REFERENCE_HASH_FILES['disease_chembl_similarity']) as f:
     text = f.read()
+
+logging.info('run tests for "GET /disease_chembl_similarity"')
 
 for row in tqdm([row for row in text.split('\n')[1:] if row.strip()]):
     if not row:
@@ -119,7 +126,35 @@ for row in tqdm([row for row in text.split('\n')[1:] if row.strip()]):
         inf = f'\n✅ PASS: expected: {hash_expected} actual: {result_hash} for {disease_id} - {chembl_id}'
         logging.info(inf)
         print(inf)
-        
+
+
+# test GET /evidences
+with open(REFERENCE_HASH_FILES['evidences']) as f:
+    text = f.read()
+
+logging.info('run tests for "GET /evidences"')
+
+for row in tqdm([row for row in text.split('\n')[1:] if row.strip()]):
+    if not row:
+        continue
+    disease_id, reference_drug_id, replacement_drug_id, hash_expected, description = row.strip().split()
+    res = requests.get(f'{BASE_URL}/evidences/{disease_id}/{reference_drug_id}/{replacement_drug_id}')
+    res_json = res.json()
+
+    for row in res_json:
+        logging.info(f'  {row["target_id"]} ({row["action_type"]}) hash: {get_obj_hash(row)}')
+
+    result_hash = get_obj_hash(res_json)
+    logging.info(f'result hash: {result_hash}')
+
+    if hash_expected != result_hash:
+        err = f'\n❌ FAIL: expected: {hash_expected} actual: {result_hash} for {disease_id} - {reference_drug_id} - {replacement_drug_id}'
+        logging.error(err)
+        print(err)
+    else:
+        inf = f'\n✅ PASS: expected: {hash_expected} actual: {result_hash} for {disease_id} - {reference_drug_id} - {replacement_drug_id}'
+        logging.info(inf)
+        print(inf)
 
 
 # Cleanup: Stop the server
