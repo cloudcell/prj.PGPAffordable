@@ -1,6 +1,8 @@
 # hash/pound sign forces the program to ignore the text line
+# empty lines are ignored
 # each line represents a separate column
 # files are assembled in a sequence using lexicographic sort order (i.e. sorted alphabetically)
+
 disease_id:
 disease_name:
 reference_drug_id: 
