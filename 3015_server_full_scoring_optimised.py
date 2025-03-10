@@ -221,6 +221,51 @@ def get_disease_chembl_similarity(disease_id: str, chembl_id: str, top_k: int = 
 
     return {'reference_drug': reference_drug, 'similar_drugs_primary': results_top_k_lvl1, 'similar_drugs_secondary': results_top_k_lvl2}
 
+@app.get("/evidences/{disease_id}/{reference_drug_id}/{replacement_drug_id}", response_model=List)
+def get_evidences(disease_id: str, reference_drug_id: str, replacement_drug_id: str):
+    q = f'''
+    SELECT DISTINCT a.target_id
+    FROM tbl_disease_target dt
+    JOIN tbl_actions a ON dt.target_id = a.target_id
+    WHERE dt.disease_id = ? AND a.ChEMBL_id = ?
+    '''
+    target_ids = conn.execute(q, [disease_id, reference_drug_id]).fetchall()
+
+    if not target_ids:
+        raise HTTPException(status_code=404, detail="No targets found for this disease")
+
+    target_ids = [row[0] for row in target_ids]
+
+    placeholders = ','.join(['?']*len(target_ids))
+    q = f'''
+    SELECT a.target_id,
+        a.actionType,
+        a.mechanismOfAction,
+        r.ref_source,
+        r.ref_data
+    FROM tbl_actions a
+    LEFT JOIN tbl_refs r ON a.action_id = r.action_id
+    WHERE a.ChEMBL_id = ? AND a.target_id IN ({placeholders})
+    '''
+    rows = conn.execute(q, [replacement_drug_id, *target_ids]).fetchall()
+
+    res = {}
+    for target_id, action_type, mechanism_of_action, ref_source, ref_data in rows:
+        k = (target_id, action_type, mechanism_of_action)
+        if k not in res:
+            res[k] = {
+                'target_id': target_id,
+                'action_type': action_type,
+                'mechanism_of_action': mechanism_of_action,
+                'refs': [{'ref_source': ref_source, 'ref_data': ref_data}]
+            }
+        else:
+            res[k]['refs'].append({'ref_source': ref_source, 'ref_data': ref_data})
+
+    res = sorted(res.values(), key=lambda x: x['target_id'])
+
+    return res
+
 
 if __name__ == "__main__":
     import uvicorn
