@@ -1,4 +1,11 @@
 # hash/pound sign forces the program to ignore the text line
 # each line represents a separate column
 # files are assembled in a sequence using lexicographic sort order (i.e. sorted alphabetically)
+disease_id: 
+reference_drug_id: 
+substitute_drug_id: 
+global_patient_population:
+cost_difference:
+evidence:
+annual_cost_reduction:
 
