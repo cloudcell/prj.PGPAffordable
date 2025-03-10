@@ -1,0 +1,3 @@
+# hash/pound sign forces the program to ignore the text line
+# each line represents a separate column
+
