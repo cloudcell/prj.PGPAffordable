@@ -257,12 +257,12 @@ def get_evidences(disease_id: str, reference_drug_id: str, replacement_drug_id: 
                 'target_id': target_id,
                 'action_type': action_type,
                 'mechanism_of_action': mechanism_of_action,
-                'refs': [{'ref_source': ref_source, 'ref_data': ref_data}]
+                'refs': []
             }
-        else:
+        if ref_source:
             res[k]['refs'].append({'ref_source': ref_source, 'ref_data': ref_data})
 
-    res = sorted(res.values(), key=lambda x: x['target_id'])
+    res = sorted(res.values(), key=lambda x: (x['action_type'] == 'UNIDENTIFIED', x['target_id']))
 
     return res
 
