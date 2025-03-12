@@ -10,7 +10,7 @@ import requests
 from tqdm import tqdm
 
 
-INPUT_IDS_FILE = 'staging_area_01/input_ids.txt'
+INPUT_DIR = 'staging_area_01'
 OUTPUT_DIR = 'staging_area_02'
 
 BASE_URL = 'http://127.0.0.1:7334'
@@ -83,19 +83,18 @@ if not wait_for_server():
 else:
     logging.info("Server started successfully.")
 
-with open(INPUT_IDS_FILE) as f:
-    text = f.read()
+for fname in tqdm([fname for fname in sorted(os.listdir(INPUT_DIR)) if fname.endswith('.txt')]):
+    with open(os.path.join(INPUT_DIR, fname)) as f:
+        text = f.read()
+    disease_id, reference_chembl_id = next(row for row in text.split('\n') if row.strip() and not row.startswith('#')).strip().split()[:2]
 
-for row in tqdm([row.strip() for row in text.split('\n') if row.strip()]):
-    # if the line startwith #, skip it
-    if row.startswith('#'):
-        continue
-    
-    disease_id, reference_chembl_id = row.split()[:2]
+    logging.info(f"generate candidates for {disease_id} - {reference_chembl_id}")
+
     disease_name = requests.get(f'{BASE_URL}/diseases/{disease_id}').json()['name']
     res = requests.get(f'{BASE_URL}/disease_chembl_similarity/{disease_id}/{reference_chembl_id}?top_k=10')
     res_json = res.json()
 
+    results = []
     for p in ('primary', 'secondary'):
         for i, row in enumerate(res_json[f'similar_drugs_{p}']):
             result = {
@@ -111,8 +110,9 @@ for row in tqdm([row.strip() for row in text.split('\n') if row.strip()]):
                 'evidence': f'Phase {row["phase"]} (phase status: {row["status"]})' if row["phase"] else 'N/A',
                 'annual_cost_reduction': 'N/A',
             }
-            with open(os.path.join(OUTPUT_DIR, f'{disease_id}_{reference_chembl_id}_{p}_candidate_{i:0>3}.txt'), 'w', encoding='utf-8') as f:
-                f.write('\n'.join(f'{k}: {v}' for k, v in result.items()))
+            results.append('\n'.join(f'{k}: {v}' for k, v in result.items()))
+    with open(os.path.join(OUTPUT_DIR, f'{disease_id}_{reference_chembl_id}_candidates.txt'), 'w', encoding='utf-8') as f:
+        f.write('\n\n'.join(results))
 
 # Cleanup: Stop the server
 server_process.terminate()
