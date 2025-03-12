@@ -1,0 +1,251 @@
+similarity: 1.0
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL742
+substitute_drug_name: KETAMINE
+global_patient_population: N/A
+cost_difference: N/A
+evidence: Phase 4.0 (phase status: Completed)
+annual_cost_reduction: N/A
+
+similarity: 1.0
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL660
+substitute_drug_name: AMANTADINE
+global_patient_population: N/A
+cost_difference: N/A
+evidence: Phase 4.0 (phase status: Recruiting)
+annual_cost_reduction: N/A
+
+similarity: 1.0
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL1714
+substitute_drug_name: KETAMINE HYDROCHLORIDE
+global_patient_population: N/A
+cost_difference: N/A
+evidence: Phase 2.0 (phase status: Recruiting)
+annual_cost_reduction: N/A
+
+similarity: 1.0
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL807
+substitute_drug_name: MEMANTINE
+global_patient_population: N/A
+cost_difference: N/A
+evidence: N/A
+annual_cost_reduction: N/A
+
+similarity: 1.0
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL2364609
+substitute_drug_name: ESKETAMINE HYDROCHLORIDE
+global_patient_population: N/A
+cost_difference: N/A
+evidence: N/A
+annual_cost_reduction: N/A
+
+similarity: 1.0
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL1699
+substitute_drug_name: MEMANTINE HYDROCHLORIDE
+global_patient_population: N/A
+cost_difference: N/A
+evidence: N/A
+annual_cost_reduction: N/A
+
+similarity: 1.0
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL1569
+substitute_drug_name: AMANTADINE HYDROCHLORIDE
+global_patient_population: N/A
+cost_difference: N/A
+evidence: N/A
+annual_cost_reduction: N/A
+
+similarity: 1.0
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL1094
+substitute_drug_name: FELBAMATE
+global_patient_population: N/A
+cost_difference: N/A
+evidence: N/A
+annual_cost_reduction: N/A
+
+similarity: 0.935401
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL900
+substitute_drug_name: ORPHENADRINE
+global_patient_population: N/A
+cost_difference: N/A
+evidence: N/A
+annual_cost_reduction: N/A
+
+similarity: 0.935401
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL1201023
+substitute_drug_name: ORPHENADRINE HYDROCHLORIDE
+global_patient_population: N/A
+cost_difference: N/A
+evidence: N/A
+annual_cost_reduction: N/A
+
+similarity: 0.935401
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL1200395
+substitute_drug_name: ORPHENADRINE CITRATE
+global_patient_population: N/A
+cost_difference: N/A
+evidence: N/A
+annual_cost_reduction: N/A
+
+similarity: 1.0
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL467084
+substitute_drug_name: LANICEMINE
+global_patient_population: N/A
+cost_difference: N/A
+evidence: N/A
+annual_cost_reduction: N/A
+
+similarity: 1.0
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL452461
+substitute_drug_name: PERZINFOTEL
+global_patient_population: N/A
+cost_difference: N/A
+evidence: N/A
+annual_cost_reduction: N/A
+
+similarity: 1.0
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL41306
+substitute_drug_name: CNS-5161
+global_patient_population: N/A
+cost_difference: N/A
+evidence: N/A
+annual_cost_reduction: N/A
+
+similarity: 1.0
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL3707355
+substitute_drug_name: AZD8108
+global_patient_population: N/A
+cost_difference: N/A
+evidence: N/A
+annual_cost_reduction: N/A
+
+similarity: 1.0
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL3545351
+substitute_drug_name: AV-101
+global_patient_population: N/A
+cost_difference: N/A
+evidence: N/A
+annual_cost_reduction: N/A
+
+similarity: 1.0
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL2110954
+substitute_drug_name: NERAMEXANE
+global_patient_population: N/A
+cost_difference: N/A
+evidence: N/A
+annual_cost_reduction: N/A
+
+similarity: 1.0
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL2110814
+substitute_drug_name: DELUCEMINE
+global_patient_population: N/A
+cost_difference: N/A
+evidence: N/A
+annual_cost_reduction: N/A
+
+similarity: 1.0
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL2107771
+substitute_drug_name: RALFINAMIDE
+global_patient_population: N/A
+cost_difference: N/A
+evidence: N/A
+annual_cost_reduction: N/A
+
+similarity: 1.0
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL2106798
+substitute_drug_name: NERAMEXANE MESYLATE
+global_patient_population: N/A
+cost_difference: N/A
+evidence: N/A
+annual_cost_reduction: N/A
+
+similarity: 1.0
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL1207366
+substitute_drug_name: GW468816
+global_patient_population: N/A
+cost_difference: N/A
+evidence: N/A
+annual_cost_reduction: N/A

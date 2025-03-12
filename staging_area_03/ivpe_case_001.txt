@@ -1,0 +1,11 @@
+similarity: 1.0
+disease_id: EFO_0009854
+disease_name: treatment resistant depression
+reference_drug_id: CHEMBL395091
+reference_drug_name: ESKETAMINE
+substitute_drug_id: CHEMBL742
+substitute_drug_name: KETAMINE
+global_patient_population: N/A
+cost_difference: N/A
+evidence: Phase 4.0 (phase status: Completed)
+annual_cost_reduction: N/A
