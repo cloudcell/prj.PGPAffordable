@@ -83,7 +83,7 @@ if not wait_for_server():
 else:
     logging.info("Server started successfully.")
 
-for i, fname in enumerate(tqdm([fname for fname in sorted(os.listdir(INPUT_DIR)) if fname.endswith('.txt')])):
+for i, fname in enumerate(tqdm([fname for fname in sorted(os.listdir(INPUT_DIR)) if fname.endswith('.txt')]), 1):
     with open(os.path.join(INPUT_DIR, fname)) as f:
         text = f.read()
     disease_id, reference_chembl_id = next(row for row in text.split('\n') if row.strip() and not row.startswith('#')).strip().split()[:2]
