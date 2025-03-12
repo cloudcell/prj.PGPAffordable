@@ -87,6 +87,10 @@ with open(INPUT_IDS_FILE) as f:
     text = f.read()
 
 for row in tqdm([row.strip() for row in text.split('\n') if row.strip()]):
+    # if the line startwith #, skip it
+    if row.startswith('#'):
+        continue
+    
     disease_id, reference_chembl_id = row.split()[:2]
     disease_name = requests.get(f'{BASE_URL}/diseases/{disease_id}').json()['name']
     res = requests.get(f'{BASE_URL}/disease_chembl_similarity/{disease_id}/{reference_chembl_id}?top_k=10')
