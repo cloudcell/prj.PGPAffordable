@@ -1,3 +1,4 @@
+import os
 import json
 from fastapi import FastAPI, Query, HTTPException
 import duckdb
@@ -6,6 +7,7 @@ from typing import List, Dict
 
 
 
+TABLE_IVPE_DIR = 'staging_area_03'
 STATUS_NUM = {
     'Active, not recruiting': 4,
     'Completed': 5,
@@ -265,6 +267,17 @@ def get_evidences(disease_id: str, reference_drug_id: str, replacement_drug_id: 
     res = sorted(res.values(), key=lambda x: (x['action_type'] == 'UNIDENTIFIED', x['target_id']))
 
     return res
+
+@app.get("/table_ivpe", response_model=List[Dict])
+def get_table_ivpe():
+    files = [fname for fname in sorted(os.listdir(TABLE_IVPE_DIR)) if fname.endswith('.txt')]
+    result = []
+    for file in files:
+        with open(os.path.join(TABLE_IVPE_DIR, file)) as f:
+            text = f.read()
+        candidate = dict(line.split(':', 1) for line in text.split('\n') if line.strip() and not line.strip().startswith('#'))
+        result.append(candidate)
+    return result
 
 
 if __name__ == "__main__":
