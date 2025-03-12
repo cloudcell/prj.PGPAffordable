@@ -1,0 +1,2 @@
+# disease_id    chembl_id
+EFO_0009854     CHEMBL395091 
