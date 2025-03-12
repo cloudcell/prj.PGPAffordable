@@ -83,7 +83,7 @@ if not wait_for_server():
 else:
     logging.info("Server started successfully.")
 
-for fname in tqdm([fname for fname in sorted(os.listdir(INPUT_DIR)) if fname.endswith('.txt')]):
+for i, fname in enumerate(tqdm([fname for fname in sorted(os.listdir(INPUT_DIR)) if fname.endswith('.txt')])):
     with open(os.path.join(INPUT_DIR, fname)) as f:
         text = f.read()
     disease_id, reference_chembl_id = next(row for row in text.split('\n') if row.strip() and not row.startswith('#')).strip().split()[:2]
@@ -96,7 +96,7 @@ for fname in tqdm([fname for fname in sorted(os.listdir(INPUT_DIR)) if fname.end
 
     results = []
     for p in ('primary', 'secondary'):
-        for i, row in enumerate(res_json[f'similar_drugs_{p}']):
+        for row in res_json[f'similar_drugs_{p}']:
             result = {
                 'similarity': row['Similarity'],
                 'disease_id': disease_id,
@@ -111,7 +111,7 @@ for fname in tqdm([fname for fname in sorted(os.listdir(INPUT_DIR)) if fname.end
                 'annual_cost_reduction': 'N/A',
             }
             results.append('\n'.join(f'{k}: {v}' for k, v in result.items()))
-    with open(os.path.join(OUTPUT_DIR, f'{disease_id}_{reference_chembl_id}_candidates.txt'), 'w', encoding='utf-8') as f:
+    with open(os.path.join(OUTPUT_DIR, f'ivpe_case_{i:0>3}.txt'), 'w', encoding='utf-8') as f:
         f.write('\n\n'.join(results))
 
 # Cleanup: Stop the server
