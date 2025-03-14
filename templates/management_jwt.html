@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Management Panel</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .delete-btn {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background-color: darkred;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Management Panel</h2>
+
+        <h3>Disease Management</h3>
+        <form id="disease-form">
+            <input type="text" id="disease_id" placeholder="Disease ID" required>
+            <input type="text" id="reference_drug_id" placeholder="Reference Drug ID" required>
+            <input type="text" id="replacement_drug_id" placeholder="Replacement Drug ID" required>
+            <button type="button" onclick="addEntry()">Add Entry</button>
+        </form>
+
+        <h3>Existing Records</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Disease ID</th>
+                    <th>Reference Drug ID</th>
+                    <th>Replacement Drug ID</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="records-table-body">
+                <!-- Table rows will be dynamically inserted here -->
+            </tbody>
+        </table>
+
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <script>
+        async function fetchDiseaseData() {
+            try {
+                const response = await fetch('/disease_management', {
+                    method: 'GET',
+                    credentials: 'include',  // ✅ Ensure cookies are sent
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+    
+                if (response.status === 401) {
+                    alert("Session expired. Please login again.");
+                    document.cookie = "token=; Path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+                    window.location.href = "/login";
+                    return;
+                }
+    
+                const data = await response.json();
+                const tableBody = document.getElementById("records-table-body");
+                tableBody.innerHTML = "";
+    
+                data.forEach(record => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${record.disease_id}</td>
+                        <td>${record.reference_drug_id}</td>
+                        <td>${record.replacement_drug_id}</td>
+                        <td>
+                            <button onclick="deleteRecord(${record.id})" class="delete-btn">Delete</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+    
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+    
+        function logout() {
+            document.cookie = "token=; Path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+            window.location.href = "/login";
+        }
+    
+        fetchDiseaseData();
+    </script>
+    
+    
+</body>
+</html>

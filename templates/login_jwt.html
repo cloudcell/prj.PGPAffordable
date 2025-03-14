@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        <form id="login-form">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="button" onclick="loginUser()">Login</button>
+        </form>
+
+        <p>Don't have an account? <a href="/register">Register here</a></p>
+
+        <p id="error-message" style="color: red;"></p>
+    </div>
+
+    <script>
+        async function loginUser() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
+    
+            const formData = new FormData();
+            formData.append("username", username);
+            formData.append("password", password);
+    
+            try {
+                const response = await fetch('/token', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'  // ✅ Ensure cookies are set by the server
+                });
+    
+                if (!response.ok) {
+                    const result = await response.json();
+                    errorMessage.textContent = result.detail || "Login failed.";
+                } else {
+                    window.location.href = "/management";
+                }
+            } catch (error) {
+                errorMessage.textContent = "Error connecting to the server.";
+            }
+        }
+    </script>
+    
+    
+</body>
+</html>
