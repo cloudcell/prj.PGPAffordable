@@ -29,23 +29,23 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const errorMessage = document.getElementById('error-message');
-
+    
             const formData = new FormData();
             formData.append("username", username);
             formData.append("password", password);
-
+    
             try {
                 const response = await fetch('/token', {
                     method: 'POST',
                     body: formData
                 });
-
+    
                 const result = await response.json();
-
+    
                 if (!response.ok) {
                     errorMessage.textContent = result.detail || "Login failed.";
                 } else {
-                    document.cookie = `token=${result.access_token}; path=/`; // Store token in cookies
+                    document.cookie = `token=${result.access_token}; path=/; Secure; SameSite=Strict;`;
                     window.location.href = "/management"; // Redirect after login
                 }
             } catch (error) {
