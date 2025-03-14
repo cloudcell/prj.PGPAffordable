@@ -93,18 +93,19 @@ from fastapi.responses import JSONResponse
 
 @app.post("/token")
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = conn.execute("SELECT * FROM users WHERE username=? AND password=?", 
-                        [form_data.username, sha256(form_data.password.encode()).hexdigest()]).fetchone()
+    hashed_password = sha256(form_data.password.encode()).hexdigest()  # ✅ Hash the input password before checking
+
+    user = conn.execute("SELECT username FROM users WHERE username=? AND password=?", 
+                        [form_data.username, hashed_password]).fetchone()
 
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
-    token = generate_token(user[1])  # ✅ Generate SHA-256 token
+    token = generate_token(user[0])  # ✅ Generate secure token
 
-    # ✅ Store the token in the database for future validation
-    conn.execute("UPDATE users SET token=? WHERE username=?", [token, user[1]])
+    # ✅ Store the token in the database
+    conn.execute("UPDATE users SET token=? WHERE username=?", [token, user[0]])
 
-    # ✅ Send token as an HttpOnly cookie
     response = JSONResponse(content={"message": "Login successful"})
     response.set_cookie(
         key="token", 
@@ -114,6 +115,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
         samesite="Strict"
     )
     return response
+
 
 
 
