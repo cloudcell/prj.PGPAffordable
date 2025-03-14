@@ -55,8 +55,11 @@ templates = Jinja2Templates(directory="templates")
 from fastapi import Header, HTTPException, Depends
 
 def get_current_user(authorization: str = Header(None)):
-    if not authorization or not authorization.startswith("Bearer "):
+    if not authorization:
         raise HTTPException(status_code=401, detail="No authentication token provided")
+
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Invalid token format")
 
     token = authorization.replace("Bearer ", "").strip()  # ✅ Remove "Bearer " prefix
 
@@ -66,6 +69,7 @@ def get_current_user(authorization: str = Header(None)):
         raise HTTPException(status_code=401, detail="Invalid token or user not authenticated")
 
     return user[0]
+
 
 
 
