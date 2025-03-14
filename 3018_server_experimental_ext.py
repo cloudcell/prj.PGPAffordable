@@ -73,11 +73,20 @@ def get_current_user(authorization: str = Header(None)):
 
 @app.post("/token")
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = conn.execute("SELECT * FROM users WHERE username=? AND password=?", 
-                        [form_data.username, sha256(form_data.password.encode()).hexdigest()]).fetchone()
+    user = conn.execute(
+        "SELECT username FROM users WHERE username=? AND password=?", 
+        [form_data.username, sha256(form_data.password.encode()).hexdigest()]
+    ).fetchone()
+
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-    return {"access_token": form_data.username, "token_type": "bearer"}
+
+    # ✅ Return token properly
+    return {
+        "access_token": user[0],  # Return username as token
+        "token_type": "bearer"
+    }
+
 
 @app.post("/register")
 def register_user(data: dict):
