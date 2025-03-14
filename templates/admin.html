@@ -1,0 +1,81 @@
+<!-- templates/admin.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Admin Panel</h2>
+        <h3>Manage IVPE Tables</h3>
+        <form id="ivpe-form">
+            <input type="text" id="table_name" placeholder="Enter table name">
+            <button type="button" onclick="addTable()">Add Table</button>
+        </form>
+        <ul id="ivpe-list"></ul>
+
+        <h3>Manage Disease Entries</h3>
+        <form id="disease-form">
+            <input type="text" id="disease_id" placeholder="Disease ID">
+            <input type="text" id="reference_drug_id" placeholder="Reference Drug ID">
+            <input type="text" id="replacement_drug_id" placeholder="Replacement Drug ID">
+            <button type="button" onclick="addDiseaseEntry()">Add Entry</button>
+        </form>
+        <ul id="disease-list"></ul>
+    </div>
+
+    <script>
+        async function addTable() {
+            const tableName = document.getElementById('table_name').value;
+            await fetch('/ivpe_tables', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ table_name: tableName })
+            });
+            loadTables();
+        }
+
+        async function addDiseaseEntry() {
+            const diseaseId = document.getElementById('disease_id').value;
+            const refDrugId = document.getElementById('reference_drug_id').value;
+            const replDrugId = document.getElementById('replacement_drug_id').value;
+            await fetch('/disease_management', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ disease_id: diseaseId, reference_drug_id: refDrugId, replacement_drug_id: replDrugId })
+            });
+            loadDiseases();
+        }
+
+        async function loadTables() {
+            const response = await fetch('/ivpe_tables');
+            const tables = await response.json();
+            const list = document.getElementById('ivpe-list');
+            list.innerHTML = '';
+            tables.forEach(table => {
+                const li = document.createElement('li');
+                li.textContent = table.table_name;
+                list.appendChild(li);
+            });
+        }
+
+        async function loadDiseases() {
+            const response = await fetch('/disease_management');
+            const diseases = await response.json();
+            const list = document.getElementById('disease-list');
+            list.innerHTML = '';
+            diseases.forEach(entry => {
+                const li = document.createElement('li');
+                li.textContent = `${entry.disease_id} - ${entry.reference_drug_id} -> ${entry.replacement_drug_id}`;
+                list.appendChild(li);
+            });
+        }
+
+        loadTables();
+        loadDiseases();
+    </script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!-- templates/register.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Register</h2>
+        <form id="register-form">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="button" onclick="registerUser()">Register</button>
+        </form>
+        <p>Already have an account? <a href="/login">Login here</a></p>
+        <p id="response-message" style="color: red;"></p>
+    </div>
+
+    <script>
+        async function registerUser() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const responseMessage = document.getElementById('response-message');
+    
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+    
+                const result = await response.json();
+    
+                if (!response.ok) {
+                    responseMessage.textContent = result.detail || "Registration failed.";
+                } else {
+                    responseMessage.style.color = "green";
+                    responseMessage.textContent = "Registration successful! Redirecting to login...";
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                }
+            } catch (error) {
+                responseMessage.textContent = "Error connecting to the server.";
+            }
+        }
+    </script>    
+    
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!-- templates/management.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Management Panel</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Management Panel</h2>
+
+        <h3>Disease Management</h3>
+        <form id="disease-form">
+            <input type="text" id="disease_id" placeholder="Disease ID" required>
+            <input type="text" id="reference_drug_id" placeholder="Reference Drug ID" required>
+            <input type="text" id="replacement_drug_id" placeholder="Replacement Drug ID" required>
+            <button type="button" onclick="addDiseaseEntry()">Add Entry</button>
+        </form>
+
+        <h3>Existing Records</h3>
+        <ul id="disease-list"></ul>
+
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <script>
+        const token = localStorage.getItem("token");
+    
+        if (!token) {
+            alert("Unauthorized access. Redirecting to login.");
+            window.location.href = "/login";
+        }
+    
+        async function fetchDiseaseData() {
+            const response = await fetch('/disease_management', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+    
+            if (response.status === 401) {
+                alert("Session expired. Please log in again.");
+                localStorage.removeItem("token");
+                window.location.href = "/login";
+            }
+    
+            const data = await response.json();
+            console.log(data);
+        }
+    
+        function logout() {
+            localStorage.removeItem("token");
+            window.location.href = "/login";
+        }
+    
+        fetchDiseaseData();
+    </script>
+    
+</body>
+</html>

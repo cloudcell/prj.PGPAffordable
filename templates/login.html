@@ -1,0 +1,60 @@
+<!-- templates/login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        <form id="login-form" onsubmit="event.preventDefault(); loginUser();">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="button" onclick="loginUser()">Login</button>
+        </form>
+        <p id="response-message" style="color: red;"></p>
+    </div>
+
+    <script>
+        async function loginUser() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const responseMessage = document.getElementById('response-message');
+    
+            const formData = new FormData();
+            formData.append("username", username);
+            formData.append("password", password);
+    
+            try {
+                const response = await fetch('/token', {
+                    method: 'POST',
+                    body: formData
+                });
+    
+                const result = await response.json();
+    
+                if (!response.ok) {
+                    responseMessage.textContent = result.detail || "Login failed.";
+                } else {
+                    // ✅ Store token in sessionStorage
+                    sessionStorage.setItem("token", result.access_token);
+    
+                    // ✅ Redirect after login
+                    window.location.href = "/management";
+                }
+            } catch (error) {
+                responseMessage.textContent = "Error connecting to the server.";
+            }
+        }
+    </script>
+    
+    
+</body>
+</html>
