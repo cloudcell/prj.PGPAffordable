@@ -1,4 +1,3 @@
-<!-- templates/management.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Management Panel</title>
     <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .delete-btn {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background-color: darkred;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -16,11 +44,23 @@
             <input type="text" id="disease_id" placeholder="Disease ID" required>
             <input type="text" id="reference_drug_id" placeholder="Reference Drug ID" required>
             <input type="text" id="replacement_drug_id" placeholder="Replacement Drug ID" required>
-            <button type="button" onclick="addDiseaseEntry()">Add Entry</button>
+            <button type="button" onclick="addEntry()">Add Entry</button>
         </form>
 
         <h3>Existing Records</h3>
-        <ul id="disease-list"></ul>
+        <table>
+            <thead>
+                <tr>
+                    <th>Disease ID</th>
+                    <th>Reference Drug ID</th>
+                    <th>Replacement Drug ID</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="records-table-body">
+                <!-- Table rows will be dynamically inserted here -->
+            </tbody>
+        </table>
 
         <button onclick="logout()">Logout</button>
     </div>
@@ -35,16 +75,16 @@
             }
             return null;
         }
-    
+
         async function fetchDiseaseData() {
             const token = getToken();
-    
+
             if (!token) {
                 alert("Unauthorized access. Redirecting to login.");
                 window.location.href = "/login";
                 return;
             }
-    
+
             try {
                 const response = await fetch('/disease_management', {
                     method: 'GET',
@@ -53,21 +93,21 @@
                         'Content-Type': 'application/json'
                     }
                 });
-    
+
                 if (!response.ok) {
                     alert("Failed to fetch records.");
                     return;
                 }
-    
+
                 const data = await response.json();
-                console.log("Fetched Data:", data); // ✅ Debugging
-    
+                console.log("Fetched Data:", data);  // Debugging
+
                 const tableBody = document.getElementById("records-table-body");
                 tableBody.innerHTML = ""; // Clear previous data
-    
+
                 data.forEach(record => {
                     const row = document.createElement("tr");
-    
+
                     row.innerHTML = `
                         <td>${record.disease_id}</td>
                         <td>${record.reference_drug_id}</td>
@@ -76,103 +116,15 @@
                             <button onclick="deleteRecord(${record.id})" class="delete-btn">Delete</button>
                         </td>
                     `;
-    
+
                     tableBody.appendChild(row);
                 });
-    
+
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
         }
-    
-        async function deleteRecord(recordId) {
-            const token = getToken();
-            if (!token) {
-                alert("Unauthorized. Redirecting to login.");
-                window.location.href = "/login";
-                return;
-            }
-    
-            try {
-                const response = await fetch(`/disease_management/${recordId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-    
-                if (response.ok) {
-                    alert("Record deleted successfully.");
-                    fetchDiseaseData(); // Refresh table after deletion
-                } else {
-                    alert("Failed to delete record.");
-                }
-            } catch (error) {
-                console.error("Error deleting record:", error);
-            }
-        }
-    
-        fetchDiseaseData(); // Fetch records on page load
-    </script>
-    
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-    
-        th, td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: center;
-        }
-    
-        th {
-            background-color: #f2f2f2;
-        }
-    
-        .delete-btn {
-            background-color: red;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-    
-        .delete-btn:hover {
-            background-color: darkred;
-        }
-    </style>
-    
-    <h2>Management Panel</h2>
-    
-    <h3>Disease Management</h3>
-    <input type="text" id="disease-id" placeholder="Disease ID">
-    <input type="text" id="reference-drug-id" placeholder="Reference Drug ID">
-    <input type="text" id="replacement-drug-id" placeholder="Replacement Drug ID">
-    <button onclick="addEntry()">Add Entry</button>
-    
-    <h3>Existing Records</h3>
-    
-    <table>
-        <thead>
-            <tr>
-                <th>Disease ID</th>
-                <th>Reference Drug ID</th>
-                <th>Replacement Drug ID</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="records-table-body">
-            <!-- Table rows will be inserted here dynamically -->
-        </tbody>
-    </table>
-    
-    <button onclick="logout()">Logout</button>
-    
-    <script>
+
         async function addEntry() {
             const token = getToken();
             if (!token) {
@@ -180,16 +132,16 @@
                 window.location.href = "/login";
                 return;
             }
-    
-            const diseaseId = document.getElementById("disease-id").value;
-            const refDrugId = document.getElementById("reference-drug-id").value;
-            const repDrugId = document.getElementById("replacement-drug-id").value;
-    
+
+            const diseaseId = document.getElementById("disease_id").value;
+            const refDrugId = document.getElementById("reference_drug_id").value;
+            const repDrugId = document.getElementById("replacement_drug_id").value;
+
             if (!diseaseId || !refDrugId || !repDrugId) {
                 alert("Please fill in all fields.");
                 return;
             }
-    
+
             try {
                 const response = await fetch('/disease_management', {
                     method: 'POST',
@@ -203,7 +155,7 @@
                         replacement_drug_id: repDrugId
                     })
                 });
-    
+
                 if (response.ok) {
                     alert("Entry added successfully.");
                     fetchDiseaseData(); // Refresh table after adding
@@ -215,16 +167,41 @@
                 console.error("Error adding entry:", error);
             }
         }
-    
+
+        async function deleteRecord(recordId) {
+            const token = getToken();
+            if (!token) {
+                alert("Unauthorized. Redirecting to login.");
+                window.location.href = "/login";
+                return;
+            }
+
+            try {
+                const response = await fetch(`/disease_management/${recordId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    alert("Record deleted successfully.");
+                    fetchDiseaseData(); // Refresh table after deletion
+                } else {
+                    alert("Failed to delete record.");
+                }
+            } catch (error) {
+                console.error("Error deleting record:", error);
+            }
+        }
+
         function logout() {
             document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
             window.location.href = "/login";
         }
+
+        fetchDiseaseData(); // Fetch records on page load
     </script>
-    
-    
-    
-    
-    
 </body>
 </html>
