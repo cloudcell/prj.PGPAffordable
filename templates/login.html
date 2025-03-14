@@ -25,34 +25,33 @@
     </div>
 
     <script>
-        <script>
-            async function loginUser() {
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-        
-                const formData = new FormData();
-                formData.append("username", username);
-                formData.append("password", password);
-        
-                try {
-                    const response = await fetch('/token', {
-                        method: 'POST',
-                        body: formData,
-                        credentials: 'include' // ✅ Ensures cookies are stored properly
-                    });
-        
-                    const result = await response.json();
-        
-                    if (!response.ok) {
-                        alert(result.detail || "Login failed.");
-                    } else {
-                        window.location.href = "/management"; // ✅ Redirect after login
-                    }
-                } catch (error) {
-                    alert("Error connecting to the server.");
+        async function loginUser() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const formData = new FormData();
+            formData.append("username", username);
+            formData.append("password", password);
+    
+            try {
+                const response = await fetch('/token', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'  // ✅ Ensures cookies are sent
+                });
+    
+                if (!response.ok) {
+                    throw new Error("Login failed.");
                 }
+    
+                // ✅ Redirect to management after successful login
+                window.location.href = "/management";
+            } catch (error) {
+                alert("Error connecting to the server.");
             }
-        </script>
+        }
+    </script>
+    
+    
         
 </body>
 </html>

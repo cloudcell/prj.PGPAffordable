@@ -66,101 +66,46 @@
     </div>
 
     <script>
-        function getToken() {
-            return document.cookie
-                .split('; ')
-                .find(row => row.startsWith('token='))
-                ?.split('=')[1] || null;
-        }
-        
-
         async function fetchDiseaseData() {
             try {
                 const response = await fetch('/disease_management', {
                     method: 'GET',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include'  // ✅ Include cookies
+                    credentials: 'include', // ✅ Automatically send cookies
+                    headers: { 'Content-Type': 'application/json' }
                 });
-        
+    
                 if (!response.ok) {
-                    alert("Authentication failed. Redirecting to login.");
+                    alert("Unauthorized. Redirecting to login.");
                     window.location.href = "/login";
                     return;
                 }
-        
+    
                 const data = await response.json();
-                populateTable(data);
+                console.log("Fetched Data:", data);
+    
+                const tableBody = document.getElementById("records-table-body");
+                tableBody.innerHTML = ""; 
+    
+                data.forEach(record => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${record.disease_id}</td>
+                        <td>${record.reference_drug_id}</td>
+                        <td>${record.replacement_drug_id}</td>
+                        <td>
+                            <button onclick="deleteRecord(${record.id})" class="delete-btn">Delete</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+    
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
         }
         
-        
-        async function addEntry() {
-            const token = getToken();
-            if (!token) {
-                window.location.href = "/login";
-                return;
-            }
-
-            const diseaseId = document.getElementById("disease_id").value;
-            const refDrugId = document.getElementById("reference_drug_id").value;
-            const repDrugId = document.getElementById("replacement_drug_id").value;
-
-            if (!diseaseId || !refDrugId || !repDrugId) return;
-
-            try {
-                const response = await fetch('/disease_management', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        disease_id: diseaseId,
-                        reference_drug_id: refDrugId,
-                        replacement_drug_id: repDrugId
-                    })
-                });
-
-                if (response.ok) {
-                    fetchDiseaseData(); // Refresh table after adding
-                }
-            } catch (error) {
-                console.error("Error adding entry:", error);
-            }
-        }
-
-        async function deleteRecord(recordId) {
-            const token = getToken();
-            if (!token) {
-                window.location.href = "/login";
-                return;
-            }
-
-            try {
-                const response = await fetch(`/disease_management/${recordId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    fetchDiseaseData(); // Refresh table after deletion
-                }
-            } catch (error) {
-                console.error("Error deleting record:", error);
-            }
-        }
-
-        function logout() {
-            document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-            window.location.href = "/login";
-        }
-
-        fetchDiseaseData(); // Fetch records on page load
+        fetchDiseaseData();
     </script>
+    
 </body>
 </html>

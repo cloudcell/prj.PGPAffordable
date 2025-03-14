@@ -91,10 +91,11 @@ def generate_token(username):
 
 from fastapi.responses import JSONResponse
 
+
 @app.post("/token")
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    hashed_password = sha256(form_data.password.encode()).hexdigest()  # ✅ Hash input password before checking
-
+    hashed_password = sha256(form_data.password.encode()).hexdigest()
+    
     user = conn.execute("SELECT username FROM users WHERE username=? AND password=?", 
                         [form_data.username, hashed_password]).fetchone()
 
@@ -103,18 +104,20 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
     token = generate_token(user[0])  # ✅ Generate secure token
 
-    # ✅ Store the token in the database
+    # ✅ Store token in DB for validation
     conn.execute("UPDATE users SET token=? WHERE username=?", [token, user[0]])
 
     response = JSONResponse(content={"message": "Login successful"})
     response.set_cookie(
         key="token", 
         value=token, 
-        httponly=True, 
-        secure=True, 
-        samesite="Strict"
+        httponly=True,  # ✅ Secure against XSS
+        secure=True,  # ✅ Use secure cookies
+        samesite="Lax",  # ✅ Allow cross-page access
+        path="/"  # ✅ Global access
     )
     return response
+
 
 
 

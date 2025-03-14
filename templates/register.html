@@ -29,24 +29,27 @@
         async function registerUser() {
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
+            const messageDiv = document.getElementById("message");
     
             const response = await fetch("/register", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, password })
             });
     
             const result = await response.json();
     
             if (!response.ok) {
-                document.getElementById("error-message").innerText = result.detail || "Registration failed.";
+                messageDiv.innerText = result.detail || "Registration failed.";
+                messageDiv.style.color = "red";
             } else {
-                window.location.href = "/login";  // ✅ Redirect after successful registration
+                messageDiv.innerText = "Registration successful! Redirecting to login...";
+                messageDiv.style.color = "green";
+                setTimeout(() => window.location.href = "/login", 2000); // ✅ Redirect to login
             }
         }
     </script>
+    
     
     
     
