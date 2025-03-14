@@ -52,13 +52,13 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 # Authentication Middleware
-from fastapi import Header
+from fastapi import Header, HTTPException, Depends
 
 def get_current_user(authorization: str = Header(None)):
-    if not authorization:
+    if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="No authentication token provided")
 
-    token = authorization.replace("Bearer ", "")  # Remove "Bearer " prefix if present
+    token = authorization.replace("Bearer ", "").strip()  # ✅ Remove "Bearer " prefix
 
     user = conn.execute("SELECT username FROM users WHERE username = ?", [token]).fetchone()
 
@@ -66,6 +66,8 @@ def get_current_user(authorization: str = Header(None)):
         raise HTTPException(status_code=401, detail="Invalid token or user not authenticated")
 
     return user[0]
+
+
 
 
 
