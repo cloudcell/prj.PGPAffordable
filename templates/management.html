@@ -78,9 +78,7 @@
 
         async function fetchDiseaseData() {
             const token = getToken();
-
             if (!token) {
-                alert("Unauthorized access. Redirecting to login.");
                 window.location.href = "/login";
                 return;
             }
@@ -94,20 +92,14 @@
                     }
                 });
 
-                if (!response.ok) {
-                    alert("Failed to fetch records.");
-                    return;
-                }
+                if (!response.ok) return;
 
                 const data = await response.json();
-                console.log("Fetched Data:", data);  // Debugging
-
                 const tableBody = document.getElementById("records-table-body");
                 tableBody.innerHTML = ""; // Clear previous data
 
                 data.forEach(record => {
                     const row = document.createElement("tr");
-
                     row.innerHTML = `
                         <td>${record.disease_id}</td>
                         <td>${record.reference_drug_id}</td>
@@ -116,7 +108,6 @@
                             <button onclick="deleteRecord(${record.id})" class="delete-btn">Delete</button>
                         </td>
                     `;
-
                     tableBody.appendChild(row);
                 });
 
@@ -128,7 +119,6 @@
         async function addEntry() {
             const token = getToken();
             if (!token) {
-                alert("Unauthorized. Redirecting to login.");
                 window.location.href = "/login";
                 return;
             }
@@ -137,10 +127,7 @@
             const refDrugId = document.getElementById("reference_drug_id").value;
             const repDrugId = document.getElementById("replacement_drug_id").value;
 
-            if (!diseaseId || !refDrugId || !repDrugId) {
-                alert("Please fill in all fields.");
-                return;
-            }
+            if (!diseaseId || !refDrugId || !repDrugId) return;
 
             try {
                 const response = await fetch('/disease_management', {
@@ -157,11 +144,7 @@
                 });
 
                 if (response.ok) {
-                    alert("Entry added successfully.");
                     fetchDiseaseData(); // Refresh table after adding
-                } else {
-                    const result = await response.json();
-                    alert(result.detail || "Failed to add entry.");
                 }
             } catch (error) {
                 console.error("Error adding entry:", error);
@@ -171,7 +154,6 @@
         async function deleteRecord(recordId) {
             const token = getToken();
             if (!token) {
-                alert("Unauthorized. Redirecting to login.");
                 window.location.href = "/login";
                 return;
             }
@@ -186,10 +168,7 @@
                 });
 
                 if (response.ok) {
-                    alert("Record deleted successfully.");
                     fetchDiseaseData(); // Refresh table after deletion
-                } else {
-                    alert("Failed to delete record.");
                 }
             } catch (error) {
                 console.error("Error deleting record:", error);
