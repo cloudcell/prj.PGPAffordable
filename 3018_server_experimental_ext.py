@@ -56,6 +56,7 @@ templates = Jinja2Templates(directory="templates")
 # Authentication Middleware
 from fastapi import Header, HTTPException, Depends, Request
 
+# use hashed password as token
 def get_current_user(request: Request, authorization: str = Header(None)):
     token = None
 
@@ -71,7 +72,7 @@ def get_current_user(request: Request, authorization: str = Header(None)):
         raise HTTPException(status_code=401, detail="No authentication token provided")
 
     # 3️⃣ Validate token against database
-    user = conn.execute("SELECT username FROM users WHERE username = ?", [token]).fetchone()
+    user = conn.execute("SELECT username FROM users WHERE password=?", [token]).fetchone()
     
     if not user:
         raise HTTPException(status_code=401, detail="Invalid token or user not authenticated")
@@ -87,8 +88,8 @@ def root():
 
 @app.post("/token")
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = conn.execute(
-        "SELECT username FROM users WHERE username=? AND password=?", 
+    user, hashed_pass = conn.execute(
+        "SELECT username, password FROM users WHERE username=? AND password=?", 
         [form_data.username, sha256(form_data.password.encode()).hexdigest()]
     ).fetchone()
 
@@ -97,7 +98,9 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
     # ✅ Return token properly
     return {
-        "access_token": user[0],  # Return username as token
+        # "access_token": user[0],  # Return username as token
+        # now return the hash of the password as token
+        "access_token": hashed_pass,
         "token_type": "bearer"
     }
 
