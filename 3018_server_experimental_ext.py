@@ -88,21 +88,21 @@ def root():
 
 @app.post("/token")
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user, hashed_pass = conn.execute(
+    result = conn.execute(
         "SELECT username, password FROM users WHERE username=? AND password=?", 
         [form_data.username, sha256(form_data.password.encode()).hexdigest()]
     ).fetchone()
 
-    if not user:
+    if not result:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
-    # ✅ Return token properly
+    user, hashed_pass = result  # Safe unpacking
+
     return {
-        # "access_token": user[0],  # Return username as token
-        # now return the hash of the password as token
-        "access_token": hashed_pass,
+        "access_token": hashed_pass,  # Return hashed password as token
         "token_type": "bearer"
     }
+
 
 
 @app.post("/register")
