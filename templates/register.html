@@ -21,37 +21,33 @@
         </form>
         <p>Already have an account? <a href="/login">Login here</a></p>
         <p id="response-message" style="color: red;"></p>
+        <p id="error-message" style="color: red;"></p>
+
     </div>
 
     <script>
         async function registerUser() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const responseMessage = document.getElementById('response-message');
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
     
-            try {
-                const response = await fetch('/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })  // ✅ Proper JSON body
-                });
+            const response = await fetch("/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ username, password })
+            });
     
-                const result = await response.json();
+            const result = await response.json();
     
-                if (!response.ok) {
-                    responseMessage.textContent = result.detail || "Registration failed.";
-                } else {
-                    responseMessage.style.color = "green";
-                    responseMessage.textContent = "Registration successful! Redirecting to login...";
-                    setTimeout(() => {
-                        window.location.href = '/login';
-                    }, 2000);
-                }
-            } catch (error) {
-                responseMessage.textContent = "Error connecting to the server.";
+            if (!response.ok) {
+                document.getElementById("error-message").innerText = result.detail || "Registration failed.";
+            } else {
+                window.location.href = "/login";  // ✅ Redirect after successful registration
             }
         }
     </script>
+    
     
     
 </body>
