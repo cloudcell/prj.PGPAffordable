@@ -79,7 +79,7 @@
                 const response = await fetch('/disease_management', {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include' // ✅ Ensure cookies are sent
+                    credentials: 'include'  // ✅ Include cookies
                 });
         
                 if (!response.ok) {
@@ -94,6 +94,7 @@
                 console.error("Error fetching data:", error);
             }
         }
+        
         
         async function addEntry() {
             const token = getToken();

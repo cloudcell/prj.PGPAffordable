@@ -61,18 +61,19 @@ templates = Jinja2Templates(directory="templates")
 from fastapi import Header, HTTPException, Depends, Request
 
 def get_current_user(request: Request):
-    token = request.cookies.get("token")
+    token = request.cookies.get("token")  # ✅ Get token from the cookie
 
     if not token:
         raise HTTPException(status_code=401, detail="No authentication token provided")
 
-    # Validate token against stored tokens (you should have a 'tokens' table)
-    user = conn.execute("SELECT username FROM users WHERE password = ?", [token]).fetchone()
+    # Validate token against stored tokens
+    user = conn.execute("SELECT username FROM users WHERE token = ?", [token]).fetchone()
 
     if not user:
         raise HTTPException(status_code=401, detail="Invalid token or user not authenticated")
 
-    return user[0]  # Return the username
+    return user[0]  # ✅ Return the authenticated username
+
 
 
 
@@ -94,39 +95,39 @@ from fastapi.responses import JSONResponse
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user = conn.execute("SELECT * FROM users WHERE username=? AND password=?", 
                         [form_data.username, sha256(form_data.password.encode()).hexdigest()]).fetchone()
+
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
-    token = generate_token(user[1])  # Generate SHA-256 token
+    token = generate_token(user[1])  # ✅ Generate SHA-256 token
 
-    # Store token in a secure HTTP-only cookie
+    # ✅ Store the token in the database for future validation
+    conn.execute("UPDATE users SET token=? WHERE username=?", [token, user[1]])
+
+    # ✅ Send token as an HttpOnly cookie
     response = JSONResponse(content={"message": "Login successful"})
     response.set_cookie(
         key="token", 
         value=token, 
         httponly=True, 
-        secure=True,  # Ensure it's only sent over HTTPS
+        secure=True, 
         samesite="Strict"
     )
     return response
 
 
+
 @app.post("/register")
-def register_user(data: dict):
-    username = data.get("username")
-    password = data.get("password")
-
-    if not username or not password:
-        raise HTTPException(status_code=400, detail="Username and password are required")
-
+def register_user(username: str, password: str):
     try:
+        hashed_password = sha256(password.encode()).hexdigest()  # ✅ Hash password before storing
         new_id = conn.execute("SELECT COALESCE(MAX(id), 0) + 1 FROM users").fetchone()[0]
         conn.execute("INSERT INTO users (id, username, password) VALUES (?, ?, ?)", 
-                     [new_id, username, sha256(password.encode()).hexdigest()])
+                     [new_id, username, hashed_password])
     except duckdb.CatalogException:
         raise HTTPException(status_code=400, detail="Username already exists")
-    
     return {"message": "User registered successfully"}
+
 
 # Serve HTML Pages
 @app.get("/admin", response_class=HTMLResponse, dependencies=[Depends(get_current_user)])
