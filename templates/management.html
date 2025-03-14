@@ -26,9 +26,10 @@
     </div>
 
     <script>
-        // Retrieve the token from sessionStorage or localStorage
-        let token = sessionStorage.getItem("token") || localStorage.getItem("token");
+        // Retrieve the token from storage
+        let token = localStorage.getItem("token") || sessionStorage.getItem("token");
     
+        // Redirect to login if no token is found
         if (!token) {
             alert("Unauthorized access. Redirecting to login.");
             window.location.href = "/login";
@@ -59,9 +60,6 @@
     
         fetchDiseaseData();
     </script>
-    
-    
-    
     
 </body>
 </html>
