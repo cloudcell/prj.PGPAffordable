@@ -1,4 +1,3 @@
-<!-- templates/login.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,7 +9,7 @@
 <body>
     <div class="container">
         <h2>Login</h2>
-        <form id="login-form" onsubmit="event.preventDefault(); loginUser();">
+        <form id="login-form">
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" required>
 
@@ -19,46 +18,40 @@
 
             <button type="button" onclick="loginUser()">Login</button>
         </form>
-        <p id="response-message" style="color: red;"></p>
+
+        <p>Don't have an account? <a href="/register">Register here</a></p>
+
+        <p id="error-message" style="color: red;"></p>
     </div>
 
     <script>
         async function loginUser() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            const responseMessage = document.getElementById('response-message');
-    
+            const errorMessage = document.getElementById('error-message');
+
             const formData = new FormData();
             formData.append("username", username);
             formData.append("password", password);
-    
+
             try {
                 const response = await fetch('/token', {
                     method: 'POST',
                     body: formData
                 });
-    
+
                 const result = await response.json();
-    
+
                 if (!response.ok) {
-                    responseMessage.textContent = result.detail || "Login failed.";
+                    errorMessage.textContent = result.detail || "Login failed.";
                 } else {
-                    // ✅ Store token as a cookie (Secure only for HTTPS)
-                    document.cookie = `token=${result.access_token}; path=/; ${window.location.protocol === 'https:' ? 'Secure;' : ''}`;
-    
-                    // ✅ Debugging: Show token in console
-                    console.log("Token stored:", document.cookie);
-    
-                    // ✅ Redirect to management
-                    window.location.href = "/management";
+                    document.cookie = `token=${result.access_token}; path=/`; // Store token in cookies
+                    window.location.href = "/management"; // Redirect after login
                 }
             } catch (error) {
-                responseMessage.textContent = "Error connecting to the server.";
+                errorMessage.textContent = "Error connecting to the server.";
             }
         }
     </script>
-    
-    
-    
 </body>
 </html>

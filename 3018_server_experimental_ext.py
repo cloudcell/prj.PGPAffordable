@@ -3,6 +3,7 @@ import json
 import duckdb
 from fastapi import FastAPI, Query, HTTPException, Depends, status, Request
 from fastapi.responses import HTMLResponse
+from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -10,6 +11,7 @@ import numpy as np
 from typing import List, Dict
 from pydantic import BaseModel
 from hashlib import sha256
+
 
 # Directories
 TABLE_IVPE_DIR = 'staging_area_03'
@@ -76,6 +78,10 @@ def get_current_user(request: Request, authorization: str = Header(None)):
 
     return user[0]
 
+
+@app.get("/", response_class=RedirectResponse)
+def root():
+    return RedirectResponse(url="/login")
 
 
 
