@@ -26,26 +26,29 @@
     </div>
 
     <script>
-        // Retrieve the token from localStorage
-        const token = localStorage.getItem("token");
+        // Retrieve the token from sessionStorage or localStorage
+        let token = sessionStorage.getItem("token") || localStorage.getItem("token");
     
-        // Redirect to login if no token is found
         if (!token) {
             alert("Unauthorized access. Redirecting to login.");
             window.location.href = "/login";
         }
     
+        // ✅ Log token for debugging
+        console.log("Using token:", token);
+    
         async function fetchDiseaseData() {
             const response = await fetch('/disease_management', {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${token}`,  // ✅ Token is sent in the request
+                    'Authorization': `Bearer ${token}`,  // ✅ Token is now included
                     'Content-Type': 'application/json'
                 }
             });
     
             if (response.status === 401) {
                 alert("Session expired. Please log in again.");
+                sessionStorage.removeItem("token");
                 localStorage.removeItem("token");
                 window.location.href = "/login";
             }
@@ -54,13 +57,9 @@
             console.log(data);
         }
     
-        function logout() {
-            localStorage.removeItem("token");
-            window.location.href = "/login";
-        }
-    
         fetchDiseaseData();
     </script>
+    
     
     
     

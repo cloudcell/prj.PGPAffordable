@@ -43,11 +43,11 @@
                 if (!response.ok) {
                     responseMessage.textContent = result.detail || "Login failed.";
                 } else {
-                    // ✅ Store token in BOTH localStorage and sessionStorage
+                    // ✅ Store token correctly
                     localStorage.setItem("token", result.access_token);
                     sessionStorage.setItem("token", result.access_token);
     
-                    // ✅ Log token to verify it's stored
+                    // ✅ Log token for debugging
                     console.log("Token stored:", localStorage.getItem("token"));
     
                     // ✅ Redirect after login
@@ -58,6 +58,7 @@
             }
         }
     </script>
+   
     
     
 </body>
