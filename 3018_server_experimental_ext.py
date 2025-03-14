@@ -122,11 +122,6 @@ def register_user(data: dict):
     
     return {"message": "User registered successfully"}
 
-# Serve HTML Pages
-@app.get("/admin", response_class=HTMLResponse, dependencies=[Depends(get_current_user)])
-def admin_page(request: Request):
-    return templates.TemplateResponse("admin.html", {"request": request})
-
 @app.get("/login", response_class=HTMLResponse)
 def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
