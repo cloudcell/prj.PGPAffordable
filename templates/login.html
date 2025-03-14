@@ -25,31 +25,34 @@
     </div>
 
     <script>
-        async function loginUser() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+        <script>
+            async function loginUser() {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
         
-            const formData = new FormData();
-            formData.append("username", username);
-            formData.append("password", password);
+                const formData = new FormData();
+                formData.append("username", username);
+                formData.append("password", password);
         
-            try {
-                const response = await fetch('/token', {
-                    method: 'POST',
-                    body: formData,
-                    credentials: 'include'  // ✅ Store token in cookies
-                });
+                try {
+                    const response = await fetch('/token', {
+                        method: 'POST',
+                        body: formData,
+                        credentials: 'include' // ✅ Ensures cookies are stored properly
+                    });
         
-                if (response.ok) {
-                    window.location.href = "/management"; // Redirect after login
-                } else {
-                    alert("Login failed.");
+                    const result = await response.json();
+        
+                    if (!response.ok) {
+                        alert(result.detail || "Login failed.");
+                    } else {
+                        window.location.href = "/management"; // ✅ Redirect after login
+                    }
+                } catch (error) {
+                    alert("Error connecting to the server.");
                 }
-            } catch (error) {
-                console.error("Login error:", error);
             }
-        }
+        </script>
         
-    </script>
 </body>
 </html>

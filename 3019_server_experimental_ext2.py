@@ -93,7 +93,7 @@ from fastapi.responses import JSONResponse
 
 @app.post("/token")
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    hashed_password = sha256(form_data.password.encode()).hexdigest()  # ✅ Hash the input password before checking
+    hashed_password = sha256(form_data.password.encode()).hexdigest()  # ✅ Hash input password before checking
 
     user = conn.execute("SELECT username FROM users WHERE username=? AND password=?", 
                         [form_data.username, hashed_password]).fetchone()
@@ -119,16 +119,28 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 
 
+
+from fastapi import Body
+
 @app.post("/register")
-def register_user(username: str, password: str):
+def register_user(data: dict = Body(...)):
+    username = data.get("username")
+    password = data.get("password")
+
+    if not username or not password:
+        raise HTTPException(status_code=400, detail="Username and password are required")
+
+    hashed_password = sha256(password.encode()).hexdigest()  # ✅ Hash password before storing
+    new_id = conn.execute("SELECT COALESCE(MAX(id), 0) + 1 FROM users").fetchone()[0]
+
     try:
-        hashed_password = sha256(password.encode()).hexdigest()  # ✅ Hash password before storing
-        new_id = conn.execute("SELECT COALESCE(MAX(id), 0) + 1 FROM users").fetchone()[0]
         conn.execute("INSERT INTO users (id, username, password) VALUES (?, ?, ?)", 
                      [new_id, username, hashed_password])
     except duckdb.CatalogException:
         raise HTTPException(status_code=400, detail="Username already exists")
+    
     return {"message": "User registered successfully"}
+
 
 
 # Serve HTML Pages
