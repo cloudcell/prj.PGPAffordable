@@ -60,27 +60,20 @@ templates = Jinja2Templates(directory="templates")
 # Authentication Middleware
 from fastapi import Header, HTTPException, Depends, Request
 
-def get_current_user(request: Request, authorization: str = Header(None)):
-    token = None
-
-    # 1️⃣ First, check for token in Authorization header
-    if authorization and authorization.startswith("Bearer "):
-        token = authorization.replace("Bearer ", "").strip()
-    
-    # 2️⃣ If missing, check for token in cookies
-    if not token:
-        token = request.cookies.get("token")
+def get_current_user(request: Request):
+    token = request.cookies.get("token")
 
     if not token:
         raise HTTPException(status_code=401, detail="No authentication token provided")
 
-    # 3️⃣ Validate token against database
-    user = conn.execute("SELECT username FROM users WHERE username = ?", [token]).fetchone()
-    
+    # Validate token against stored tokens (you should have a 'tokens' table)
+    user = conn.execute("SELECT username FROM users WHERE password = ?", [token]).fetchone()
+
     if not user:
         raise HTTPException(status_code=401, detail="Invalid token or user not authenticated")
 
-    return user[0]
+    return user[0]  # Return the username
+
 
 
 @app.get("/", response_class=RedirectResponse)
@@ -95,15 +88,28 @@ def generate_token(username):
     hashed_token = hashlib.sha256(f"{username}{random_string}".encode()).hexdigest()
     return hashed_token
 
+from fastapi.responses import JSONResponse
+
 @app.post("/token")
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user = conn.execute("SELECT * FROM users WHERE username=? AND password=?", 
                         [form_data.username, sha256(form_data.password.encode()).hexdigest()]).fetchone()
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-    
+
     token = generate_token(user[1])  # Generate SHA-256 token
-    return {"access_token": token, "token_type": "bearer"}
+
+    # Store token in a secure HTTP-only cookie
+    response = JSONResponse(content={"message": "Login successful"})
+    response.set_cookie(
+        key="token", 
+        value=token, 
+        httponly=True, 
+        secure=True,  # Ensure it's only sent over HTTPS
+        samesite="Strict"
+    )
+    return response
+
 
 @app.post("/register")
 def register_user(data: dict):

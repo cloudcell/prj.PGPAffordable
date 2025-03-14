@@ -28,30 +28,28 @@
         async function loginUser() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            const errorMessage = document.getElementById('error-message');
-    
+        
             const formData = new FormData();
             formData.append("username", username);
             formData.append("password", password);
-    
+        
             try {
                 const response = await fetch('/token', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    credentials: 'include'  // ✅ Store token in cookies
                 });
-    
-                const result = await response.json();
-    
-                if (!response.ok) {
-                    errorMessage.textContent = result.detail || "Login failed.";
-                } else {
-                    document.cookie = `token=${result.access_token}; path=/; Secure; SameSite=Strict;`;
+        
+                if (response.ok) {
                     window.location.href = "/management"; // Redirect after login
+                } else {
+                    alert("Login failed.");
                 }
             } catch (error) {
-                errorMessage.textContent = "Error connecting to the server.";
+                console.error("Login error:", error);
             }
         }
+        
     </script>
 </body>
 </html>

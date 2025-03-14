@@ -75,45 +75,26 @@
         
 
         async function fetchDiseaseData() {
-            const token = getToken();
-            if (!token) {
-                window.location.href = "/login";
-                return;
-            }
-
             try {
                 const response = await fetch('/disease_management', {
                     method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include' // ✅ Ensure cookies are sent
                 });
-
-                if (!response.ok) return;
-
+        
+                if (!response.ok) {
+                    alert("Authentication failed. Redirecting to login.");
+                    window.location.href = "/login";
+                    return;
+                }
+        
                 const data = await response.json();
-                const tableBody = document.getElementById("records-table-body");
-                tableBody.innerHTML = ""; // Clear previous data
-
-                data.forEach(record => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${record.disease_id}</td>
-                        <td>${record.reference_drug_id}</td>
-                        <td>${record.replacement_drug_id}</td>
-                        <td>
-                            <button onclick="deleteRecord(${record.id})" class="delete-btn">Delete</button>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-
+                populateTable(data);
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
         }
-
+        
         async function addEntry() {
             const token = getToken();
             if (!token) {
