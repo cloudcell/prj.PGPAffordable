@@ -26,8 +26,18 @@
     </div>
 
     <script>
+        function getToken() {
+            const cookies = document.cookie.split("; ");
+            for (let cookie of cookies) {
+                if (cookie.startsWith("token=")) {
+                    return cookie.split("=")[1];
+                }
+            }
+            return null;
+        }
+    
         async function fetchDiseaseData() {
-            const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+            const token = getToken();
     
             if (!token) {
                 alert("Unauthorized access. Redirecting to login.");
@@ -39,15 +49,14 @@
                 const response = await fetch('/disease_management', {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${token}`,  // ✅ Token is now included
+                        'Authorization': `Bearer ${token}`,  // ✅ Now sending token correctly
                         'Content-Type': 'application/json'
                     }
                 });
     
                 if (response.status === 401) {
                     alert("Session expired. Please log in again.");
-                    localStorage.removeItem("token");
-                    sessionStorage.removeItem("token");
+                    document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
                     window.location.href = "/login";
                     return;
                 }
@@ -61,6 +70,8 @@
     
         fetchDiseaseData();
     </script>
+    
+    
     
     
 </body>

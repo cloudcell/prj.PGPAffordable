@@ -43,10 +43,10 @@
                 if (!response.ok) {
                     responseMessage.textContent = result.detail || "Login failed.";
                 } else {
-                    // ✅ Store token at the ROOT domain
-                    document.cookie = `token=${result.access_token}; path=/; Secure`;
+                    // ✅ Store token as a cookie (Secure only for HTTPS)
+                    document.cookie = `token=${result.access_token}; path=/; ${window.location.protocol === 'https:' ? 'Secure;' : ''}`;
     
-                    // ✅ Log token for debugging
+                    // ✅ Debugging: Show token in console
                     console.log("Token stored:", document.cookie);
     
                     // ✅ Redirect to management
@@ -57,6 +57,7 @@
             }
         }
     </script>
+    
     
     
 </body>

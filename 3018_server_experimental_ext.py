@@ -52,23 +52,30 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 # Authentication Middleware
-from fastapi import Header, HTTPException, Depends
+from fastapi import Header, HTTPException, Depends, Request
 
-def get_current_user(authorization: str = Header(None)):
-    if not authorization:
+def get_current_user(request: Request, authorization: str = Header(None)):
+    token = None
+
+    # 1️⃣ First, check for token in Authorization header
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization.replace("Bearer ", "").strip()
+    
+    # 2️⃣ If missing, check for token in cookies
+    if not token:
+        token = request.cookies.get("token")
+
+    if not token:
         raise HTTPException(status_code=401, detail="No authentication token provided")
 
-    if not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Invalid token format")
-
-    token = authorization.replace("Bearer ", "").strip()  # ✅ Remove "Bearer " prefix
-
+    # 3️⃣ Validate token against database
     user = conn.execute("SELECT username FROM users WHERE username = ?", [token]).fetchone()
-
+    
     if not user:
         raise HTTPException(status_code=401, detail="Invalid token or user not authenticated")
 
     return user[0]
+
 
 
 
@@ -130,9 +137,11 @@ class DiseaseEntry(BaseModel):
     replacement_drug_id: str
 
 @app.get("/disease_management", response_model=List[Dict], dependencies=[Depends(get_current_user)])
-def list_disease_entries():
+def get_disease_entries():
     rows = conn.execute("SELECT * FROM disease_management").fetchall()
+    print("Fetched Records:", rows)  # ✅ Debugging: Check if records exist in the backend
     return [{"id": r[0], "disease_id": r[1], "reference_drug_id": r[2], "replacement_drug_id": r[3]} for r in rows]
+
 
 @app.post("/disease_management", dependencies=[Depends(get_current_user)])
 def add_disease_entry(entry: DiseaseEntry):
